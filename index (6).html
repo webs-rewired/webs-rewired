@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WEBS: RE-WIRED 🌐</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Rubik+Wet+Paint&family=Source+Code+Pro:wght@300;400;600;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030303;--text:#f0f0f0;
+  --red:#b30000;--red-bright:#ff2020;
+  --cyan:#00f0ff;--green:#00ff88;--yellow:#ffcc00;
+  --card:#0a0a0a;
+  --glow-r:0 0 10px #b30000,0 0 30px #b3000044;
+  --glow-c:0 0 10px #00f0ff,0 0 30px #00f0ff44;
+  --glow-g:0 0 10px #00ff88,0 0 30px #00ff8844;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Source Code Pro',monospace;overflow-x:hidden;cursor:crosshair;min-height:100vh;font-size:17px;}
+body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.06) 3px,rgba(0,0,0,.06) 4px);pointer-events:none;z-index:9998;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:#000;}::-webkit-scrollbar-thumb{background:var(--red);}
+
+/* ===== BOOT ===== */
+#boot{position:fixed;inset:0;background:#000;z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity 1s ease;}
+#boot.out{opacity:0;pointer-events:none;}
+.boot-inner{width:min(520px,90vw);}
+.boot-line{font-size:15px;line-height:2;opacity:0;animation:bl .05s ease forwards;}
+.bl-g{color:var(--green);}.bl-r{color:var(--red-bright);}.bl-w{color:#fff;}.bl-y{color:var(--yellow);}.bl-c{color:var(--cyan);}
+@keyframes bl{to{opacity:1;}}
+
+/* ===== ANNOUNCEMENT OVERLAY ===== */
+#announcement-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.98);
+  z-index:9500;display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  animation:fadeIn .5s ease;
+}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.ann-box{
+  background:#050505;border:2px solid var(--red);
+  width:min(700px,95vw);max-height:90vh;
+  display:flex;flex-direction:column;
+  box-shadow:var(--glow-r),0 0 60px rgba(179,0,0,.15);
+}
+.ann-header{
+  padding:24px 28px 16px;border-bottom:1px solid var(--red);
+  flex-shrink:0;
+}
+.ann-badge{
+  background:var(--red);color:#fff;font-size:10px;letter-spacing:3px;
+  padding:4px 12px;text-transform:uppercase;display:inline-block;
+  margin-bottom:12px;animation:badgePulse 1.5s ease-in-out infinite alternate;
+}
+@keyframes badgePulse{from{box-shadow:none;}to{box-shadow:var(--glow-r);}}
+.ann-title{
+  font-family:'Rubik Wet Paint',cursive;font-size:clamp(20px,4vw,30px);
+  color:var(--red-bright);letter-spacing:3px;text-shadow:var(--glow-r);
+}
+.ann-scroll-area{
+  overflow-y:auto;padding:24px 28px;flex:1;
+}
+.ann-scroll-area::-webkit-scrollbar{width:3px;}
+.ann-scroll-area::-webkit-scrollbar-thumb{background:var(--red);}
+.ann-body{font-size:14px;color:#ddd;line-height:1.9;}
+.ann-body p{margin-bottom:16px;}
+.ann-section-title{
+  font-size:12px;letter-spacing:3px;color:var(--red);
+  text-transform:uppercase;margin:20px 0 10px;
+  display:flex;align-items:center;gap:8px;
+}
+.ann-section-title::after{content:'';flex:1;height:1px;background:var(--red-dim,#330000);}
+.ann-list{list-style:none;padding:0;margin-bottom:16px;}
+.ann-list li{
+  font-size:14px;color:#ddd;padding:8px 0;
+  border-bottom:1px solid #111;display:flex;
+  align-items:flex-start;gap:10px;line-height:1.7;
+}
+.ann-list li::before{content:'›';color:var(--red-bright);flex-shrink:0;margin-top:2px;}
+.ann-glitch-tag{
+  display:inline-block;background:rgba(0,240,255,.08);
+  border:1px solid var(--cyan);color:var(--cyan);
+  padding:3px 10px;font-size:12px;letter-spacing:1px;
+  margin-top:8px;
+}
+.ann-footer{
+  padding:16px 28px;border-top:1px solid #1a1a1a;flex-shrink:0;
+}
+.scroll-hint{font-size:11px;color:#888;letter-spacing:2px;text-align:center;margin-bottom:10px;animation:flicker 3s infinite;}
+#support-btn{
+  width:100%;background:#000;border:2px solid var(--red);
+  color:var(--red-bright);padding:14px;
+  font-family:'Source Code Pro',monospace;font-size:13px;
+  letter-spacing:4px;cursor:pointer;text-transform:uppercase;
+  transition:all .3s;opacity:.3;pointer-events:none;
+}
+#support-btn.ready{
+  opacity:1;pointer-events:all;
+  animation:btnGlow 2s ease-in-out infinite alternate;
+}
+@keyframes btnGlow{from{box-shadow:none;}to{box-shadow:var(--glow-r);}}
+#support-btn.ready:hover{background:rgba(179,0,0,.15);transform:translateY(-2px);}
+
+/* ===== WAR MESSAGES ABOVE HERO ===== */
+.war-messages{
+  display:flex;flex-direction:column;gap:6px;
+  margin-bottom:28px;width:100%;max-width:700px;
+}
+.war-msg-line{
+  font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  text-align:center;padding:5px 12px;
+  animation:warLinePulse 3s ease-in-out infinite alternate;
+}
+.war-msg-line.red{color:var(--red-bright);text-shadow:var(--glow-r);}
+.war-msg-line.yellow{color:var(--yellow);}
+.war-msg-line.white{color:#fff;}
+@keyframes warLinePulse{from{opacity:.7;}to{opacity:1;}}
+
+/* ===== CURSOR ===== */
+.cursor-dot{position:fixed;width:5px;height:5px;border-radius:50%;pointer-events:none;z-index:9996;mix-blend-mode:screen;}
+
+/* ===== NAV ===== */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(3,3,3,.97);border-bottom:1px solid var(--red);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px);}
+.nav-left{display:flex;flex-direction:column;gap:5px;flex-shrink:0;}
+.nav-logo{font-family:'Rubik Glitch',cursive;color:var(--cyan);font-size:16px;text-shadow:var(--glow-c);letter-spacing:3px;line-height:1;animation:logoGlitch 6s infinite;}
+@keyframes logoGlitch{0%,90%,100%{transform:none;filter:none;}91%{transform:translateX(-2px);filter:hue-rotate(90deg);}92%{transform:translateX(2px);}93%{transform:none;filter:none;}}
+.nav-shortcuts{display:flex;gap:8px;flex-wrap:wrap;}
+.nav-shortcut{
+  color:#ddd;text-decoration:none;font-size:12px;letter-spacing:1px;
+  text-transform:uppercase;transition:all .2s;
+  border:1px solid #333;padding:4px 12px;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.nav-shortcut:hover{border-color:var(--cyan);color:var(--cyan);}
+.nav-shortcut.green{border-color:#1a4a1a;color:var(--green);}
+.nav-shortcut.green:hover{border-color:var(--green);box-shadow:var(--glow-g);}
+.nav-shortcut.red{border-color:#4a1a1a;color:var(--red-bright);}
+.nav-shortcut.red:hover{border-color:var(--red-bright);box-shadow:var(--glow-r);}
+.nav-shortcut.yellow{border-color:#4a4a1a;color:var(--yellow);}
+.nav-shortcut.yellow:hover{border-color:var(--yellow);}
+#admin-btn{background:transparent;border:1px solid var(--red);color:var(--red-bright);padding:4px 12px;font-family:'Source Code Pro',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;animation:pbtn 2.5s ease-in-out infinite alternate;}
+@keyframes pbtn{from{box-shadow:none;}to{box-shadow:var(--glow-r);}}
+#admin-btn:hover{background:rgba(179,0,0,.15);}
+.nav-links{display:flex;gap:16px;list-style:none;flex-wrap:wrap;justify-content:flex-end;}
+.nav-links a{color:#ddd;text-decoration:none;font-size:13px;letter-spacing:2px;text-transform:uppercase;transition:color .15s;}
+.nav-links a:hover{color:var(--cyan);text-shadow:var(--glow-c);}
+.nav-chat{color:var(--green) !important;text-shadow:var(--glow-g);}
+
+/* ===== TICKER ===== */
+.ticker-wrap{background:#000;border-bottom:1px solid #0d0d0d;overflow:hidden;height:30px;margin-top:68px;}
+.ticker{display:flex;animation:tick 55s linear infinite;white-space:nowrap;}
+.ticker-item{font-size:13px;letter-spacing:2px;padding:7px 30px;color:#ddd;text-transform:uppercase;flex-shrink:0;}
+.ticker-item span{color:var(--red);}
+@keyframes tick{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ===== HERO ===== */
+#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 60%,rgba(179,0,0,.07) 0%,transparent 70%),radial-gradient(ellipse 30% 30% at 20% 20%,rgba(0,240,255,.03) 0%,transparent 60%);pointer-events:none;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,black 0%,transparent 100%);animation:gridPulse 4s ease-in-out infinite alternate;}
+@keyframes gridPulse{from{opacity:.5;}to{opacity:1;}}
+.particle{position:absolute;width:2px;height:2px;border-radius:50%;pointer-events:none;animation:particleFloat linear infinite;}
+@keyframes particleFloat{0%{transform:translateY(100vh) translateX(0);opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{transform:translateY(-100px) translateX(var(--dx));opacity:0;}}
+.hero-eyebrow{font-size:14px;letter-spacing:6px;color:var(--red);text-transform:uppercase;margin-bottom:24px;animation:flicker 8s infinite;}
+@keyframes flicker{0%,94%,100%{opacity:1;}95%{opacity:.3;}96%{opacity:1;}97%{opacity:.5;}98%{opacity:1;}}
+.hero-title{font-family:'Rubik Glitch',cursive;font-size:clamp(52px,12vw,130px);line-height:.9;color:#fff;position:relative;margin-bottom:8px;animation:gt 5s infinite;}
+.hero-title::before,.hero-title::after{content:attr(data-text);position:absolute;top:0;left:0;right:0;font-family:'Rubik Glitch',cursive;}
+.hero-title::before{color:var(--cyan);animation:ga 5s infinite;opacity:.7;}
+.hero-title::after{color:var(--red-bright);animation:gb 5s infinite;opacity:.7;}
+@keyframes gt{0%,88%,100%{transform:none;filter:none;}89%{transform:skewX(-1deg) translateX(-3px);filter:hue-rotate(30deg);}90%{transform:skewX(1deg) translateX(3px);}91%{transform:none;filter:none;}}
+@keyframes ga{0%,88%,100%{clip-path:none;transform:none;opacity:0;}89%{clip-path:polygon(0 15%,100% 15%,100% 45%,0 45%);transform:translateX(-5px);opacity:.7;}90%{clip-path:polygon(0 55%,100% 55%,100% 75%,0 75%);transform:translateX(5px);}91%{clip-path:none;opacity:0;}}
+@keyframes gb{0%,86%,100%{clip-path:none;transform:none;opacity:0;}87%{clip-path:polygon(0 60%,100% 60%,100% 85%,0 85%);transform:translateX(5px);opacity:.7;}88%{clip-path:polygon(0 0%,100% 0%,100% 30%,0 30%);transform:translateX(-5px);}89%{clip-path:none;opacity:0;}}
+.hero-sub{font-family:'Special Elite',cursive;font-size:clamp(15px,2.5vw,20px);color:var(--red);letter-spacing:5px;text-transform:uppercase;margin-bottom:36px;text-shadow:var(--glow-r);animation:flicker 6s infinite 2s;}
+.hero-stats{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;margin-bottom:36px;}
+.stat-block{background:rgba(0,0,0,.6);border:1px solid #222;padding:16px 26px;text-align:center;min-width:130px;transition:all .3s;position:relative;overflow:hidden;}
+.stat-block::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);animation:scanLine 3s ease-in-out infinite;}
+@keyframes scanLine{0%{left:-100%;}100%{left:200%;}}
+.stat-block:first-child{border-left:2px solid var(--red);}
+.stat-block:hover{border-color:var(--cyan);transform:translateY(-2px);box-shadow:var(--glow-c);}
+.stat-num{font-family:'Rubik Wet Paint',cursive;font-size:30px;color:var(--cyan);text-shadow:var(--glow-c);display:block;}
+.stat-label{font-size:12px;letter-spacing:3px;color:#ddd;text-transform:uppercase;margin-top:2px;}
+.hero-pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.hero-pill{background:transparent;border:1px solid #444;padding:7px 18px;font-size:13px;letter-spacing:3px;color:#ddd;text-transform:uppercase;transition:all .3s;cursor:default;}
+.hero-pill.active{border-color:var(--cyan);color:var(--cyan);text-shadow:var(--glow-c);box-shadow:0 0 12px rgba(0,240,255,.12);animation:pillPulse 2s ease-in-out infinite alternate;}
+@keyframes pillPulse{from{box-shadow:0 0 5px rgba(0,240,255,.1);}to{box-shadow:0 0 20px rgba(0,240,255,.3);}}
+.scroll-cue{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);color:var(--red);font-size:11px;letter-spacing:4px;text-transform:uppercase;animation:bob 2s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(8px);}}
+
+.section{max-width:1140px;margin:0 auto;padding:80px 24px;}
+.section-label{font-size:11px;letter-spacing:4px;color:var(--red);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.section-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--red);}
+.section-title{font-family:'Rubik Wet Paint',cursive;font-size:clamp(26px,5vw,42px);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;position:relative;display:inline-block;}
+.section-title::after{content:'';display:block;height:2px;background:linear-gradient(90deg,var(--red),transparent);margin-top:6px;}
+.section-desc{font-size:12px;color:#ddd;letter-spacing:2px;margin-bottom:40px;text-transform:uppercase;}
+.divider{max-width:1140px;margin:0 auto;border:none;border-top:1px solid #111;position:relative;}
+.divider::before{content:'//';position:absolute;left:24px;top:-8px;background:var(--bg);padding:0 8px;color:#333;font-size:12px;}
+
+.rank-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:#0d0d0d;border:1px solid #0d0d0d;}
+.rank-card{background:var(--card);padding:26px 24px;position:relative;cursor:default;transition:all .3s;overflow:hidden;}
+.rank-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;transition:width .3s;}
+.rank-card:hover::before{width:6px;}
+.rank-card:nth-child(1)::before{background:#1a1a1a;}
+.rank-card:nth-child(2)::before{background:#440000;}
+.rank-card:nth-child(3)::before{background:#6a0000;}
+.rank-card:nth-child(4)::before{background:#880000;}
+.rank-card:nth-child(5)::before{background:var(--red);}
+.rank-card:nth-child(6)::before{background:var(--red-bright);box-shadow:0 0 10px var(--red-bright);}
+.rank-card:nth-child(7)::before{background:#fff;box-shadow:0 0 10px #fff;}
+.rank-card::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.02),transparent);transition:left .5s;}
+.rank-card:hover::after{left:100%;}
+.rank-card:hover{background:#0d0d0d;transform:translateY(-2px);}
+.rank-tier{font-size:11px;letter-spacing:3px;color:#ddd;text-transform:uppercase;margin-bottom:8px;}
+.rank-name{font-family:'Rubik Wet Paint',cursive;font-size:22px;letter-spacing:2px;margin-bottom:10px;}
+.rank-card:nth-child(1) .rank-name{color:#fff;}
+.rank-card:nth-child(2) .rank-name{color:#ff6666;}
+.rank-card:nth-child(3) .rank-name{color:#ff7777;}
+.rank-card:nth-child(4) .rank-name{color:#ff8888;}
+.rank-card:nth-child(5) .rank-name{color:var(--red-bright);}
+.rank-card:nth-child(6) .rank-name{color:#fff;text-shadow:0 0 20px rgba(255,255,255,.4);}
+.rank-card:nth-child(7) .rank-name{color:#fff;text-shadow:0 0 20px #fff,0 0 40px rgba(255,255,255,.6);letter-spacing:4px;animation:sentinelPulse 2s ease-in-out infinite alternate;}
+@keyframes sentinelPulse{from{text-shadow:0 0 10px #fff,0 0 20px rgba(255,255,255,.3);}to{text-shadow:0 0 20px #fff,0 0 40px #fff,0 0 60px rgba(255,255,255,.4);}}
+.rank-desc{font-size:14px;color:#ddd;line-height:1.7;}
+.rank-card:hover .rank-desc{color:#fff;}
+
+.records-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;}
+.filter-btn{background:transparent;border:1px solid #444;color:#ddd;padding:6px 16px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.filter-btn:hover,.filter-btn.active{border-color:var(--cyan);color:var(--cyan);}
+.records-table{width:100%;border-collapse:collapse;font-size:14px;}
+.records-table thead tr{border-bottom:1px solid var(--red);}
+.records-table th{padding:12px 14px;color:var(--red);font-size:11px;letter-spacing:3px;text-transform:uppercase;text-align:left;font-weight:400;}
+.records-table td{padding:13px 14px;border-bottom:1px solid #111;transition:background .15s;vertical-align:middle;color:#ddd;}
+.records-table tr:hover td{background:rgba(179,0,0,.04);}
+.rec-player{color:var(--cyan);font-weight:600;font-size:15px;}
+.rec-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+.rec-tag{font-size:10px;padding:2px 7px;border:1px solid #444;color:#ddd;letter-spacing:1px;}
+.rec-tag.sp{border-color:var(--cyan);color:var(--cyan);}
+.rank-badge{display:inline-block;padding:3px 9px;font-size:10px;letter-spacing:2px;text-transform:uppercase;border:1px solid;}
+.badge-scanned{border-color:#666;color:#fff;}
+.badge-indexed{border-color:#aa0000;color:#ff8888;}
+.badge-sentinel{border-color:#fff;color:#fff;text-shadow:0 0 8px #fff;}
+.cat-header{padding:10px 14px;font-size:11px;letter-spacing:3px;color:#ddd;text-transform:uppercase;background:var(--bg);border-bottom:1px solid #111;}
+.empty-row td{padding:16px 14px;color:#aaa;font-size:13px;font-style:italic;}
+.submit-box{margin-top:24px;padding:16px 20px;border:1px dashed #444;font-size:13px;color:#ddd;letter-spacing:1px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.submit-box a{color:var(--cyan);text-decoration:none;}
+
+.challenges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:#0d0d0d;border:1px solid #0d0d0d;}
+.ch-card{background:var(--card);padding:28px;position:relative;overflow:hidden;transition:all .3s;}
+.ch-card::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);transition:left .5s;}
+.ch-card:hover::after{left:100%;}
+.ch-card:hover{background:#0c0c0c;transform:translateY(-3px);}
+.ch-name{font-family:'Rubik Wet Paint',cursive;font-size:20px;color:var(--red-bright);text-shadow:var(--glow-r);margin-bottom:12px;letter-spacing:1px;}
+.ch-obj{font-size:13px;color:#ddd;line-height:1.7;margin-bottom:12px;}
+.ch-alt{font-size:12px;color:#ddd;line-height:1.6;margin-bottom:12px;border-left:2px solid #444;padding-left:10px;font-style:italic;}
+.ch-prize{font-size:12px;color:var(--green);letter-spacing:1px;margin-bottom:12px;}
+.ch-prize::before{content:'◆ PRIZE: ';color:#ddd;}
+.ch-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.ch-status{font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:4px 12px;border:1px solid;}
+.s-open{border-color:var(--cyan);color:var(--cyan);}
+.s-partial{border-color:var(--yellow);color:var(--yellow);}
+.s-closed{border-color:var(--green);color:var(--green);}
+.ch-completions{font-size:11px;color:#ddd;}
+.ch-completions span{color:#fff;}
+
+.tag-section-head{font-size:12px;letter-spacing:3px;color:#ddd;text-transform:uppercase;margin:32px 0 14px;display:flex;align-items:center;gap:10px;}
+.tag-section-head::after{content:'';flex:1;height:1px;background:#222;}
+.tags-wrap{display:flex;flex-wrap:wrap;gap:8px;}
+.tag{position:relative;display:inline-flex;align-items:center;gap:6px;padding:10px 16px;background:rgba(5,5,5,.9);border:1px solid #333;font-size:13px;letter-spacing:1px;cursor:default;transition:all .25s;}
+.tag.tc{border-color:var(--red);color:var(--red-bright);}
+.tag.ts{border-color:var(--cyan);color:var(--cyan);}
+.tag.tg{border-color:#666;color:#fff;}
+.tag:hover{transform:scale(1.08);z-index:10;}
+.tag.tc:hover{box-shadow:var(--glow-r);}
+.tag.ts:hover{box-shadow:var(--glow-c);}
+.tag.tg:hover{box-shadow:0 0 10px rgba(255,255,255,.1);}
+.tag.unavail{opacity:1;border-style:dashed;filter:brightness(.6);}
+.tag-tip{position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%) translateY(4px);background:#080808;border:1px solid #444;padding:12px 16px;font-size:12px;color:#fff;width:240px;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:200;line-height:1.6;}
+.tag-tip a{color:var(--cyan);text-decoration:none;}
+.tag:hover .tag-tip{opacity:1;transform:translateX(-50%) translateY(0);}
+.tag-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#444;}
+
+.hint-intro{background:#000;border:1px solid #222;border-left:3px solid var(--yellow);padding:18px 20px;font-size:11px;color:#ddd;line-height:1.8;margin-bottom:30px;}
+.hint-intro strong{color:var(--yellow);}
+.hints-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;background:#0d0d0d;border:1px solid #0d0d0d;}
+.hint-card{background:var(--card);padding:24px;transition:all .3s;}
+.hint-card:hover{background:#0c0c0c;transform:translateY(-2px);}
+.hint-num{font-size:8px;letter-spacing:3px;color:#ddd;text-transform:uppercase;margin-bottom:10px;}
+.hint-title{font-family:'Rubik Wet Paint',cursive;font-size:15px;color:var(--yellow);margin-bottom:12px;letter-spacing:1px;}
+.hint-body{font-size:11px;color:#ddd;line-height:1.9;}
+.hint-body ol{padding-left:16px;}
+.hint-body ol li{color:#ddd;margin-bottom:4px;}
+.hint-body a{color:var(--cyan);text-decoration:none;}
+.hint-note{margin-top:10px;padding:8px 12px;background:#050505;border-left:2px solid #444;font-size:10px;color:#ddd;font-style:italic;}
+
+.terms-layout{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1px;background:#0d0d0d;border:1px solid #0d0d0d;}
+.terms-block{background:var(--card);padding:24px;transition:background .2s;}
+.terms-block:hover{background:#0c0c0c;}
+.terms-block-title{font-size:9px;letter-spacing:3px;color:var(--red);text-transform:uppercase;margin-bottom:14px;}
+.terms-list{list-style:none;padding:0;}
+.terms-list li{font-size:11px;color:#ddd;line-height:1.8;padding:4px 0;border-bottom:1px solid #1a1a1a;display:flex;align-items:flex-start;gap:8px;}
+.terms-list li::before{content:'›';color:var(--red);flex-shrink:0;margin-top:1px;}
+.banned-box{margin-top:24px;background:#080000;border:1px solid #330000;padding:20px 24px;}
+.banned-title{font-size:9px;letter-spacing:3px;color:var(--red-bright);text-transform:uppercase;margin-bottom:14px;}
+.banned-entry{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:12px;color:#ff8888;letter-spacing:1px;}
+.banned-entry::before{content:'✕';color:var(--red-bright);}
+.contact-box{margin-top:24px;background:var(--card);border:1px solid #222;padding:20px 24px;}
+.contact-title{font-size:9px;letter-spacing:3px;color:#ddd;text-transform:uppercase;margin-bottom:14px;}
+.contact-entry{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #1a1a1a;font-size:11px;color:#ddd;}
+.contact-entry a{color:var(--cyan);text-decoration:none;}
+.final-rule{margin-top:30px;padding:20px 24px;border:1px solid #222;background:#050505;font-size:10px;color:#ddd;line-height:1.8;text-align:center;}
+.final-rule strong{color:#fff;display:block;margin-bottom:8px;font-size:11px;letter-spacing:2px;}
+
+.term-box{background:#000;border:1px solid #0a0a0a;border-top:3px solid var(--green);overflow:hidden;}
+.term-bar{background:#050505;border-bottom:1px solid #0a0a0a;padding:8px 14px;display:flex;align-items:center;gap:6px;}
+.tdot{width:10px;height:10px;border-radius:50%;}
+.tdot:nth-child(1){background:#ff5f57;}.tdot:nth-child(2){background:#febc2e;}.tdot:nth-child(3){background:#28c840;}
+.tlabel{font-size:9px;color:#ddd;letter-spacing:2px;margin-left:8px;}
+.term-body{padding:20px;line-height:2.1;font-size:12px;}
+.tl{display:block;}.tp{color:#ddd;}.tc2{color:var(--cyan);}.tg2{color:var(--green);}.tw{color:var(--yellow);}.te{color:var(--red-bright);}
+.tok{color:var(--green);text-shadow:var(--glow-g);}.tb{color:transparent;user-select:none;}
+.tcur::after{content:'█';animation:blink 1s step-end infinite;color:var(--green);}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+#admin-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9000;align-items:center;justify-content:center;}
+#admin-modal.open{display:flex;}
+.modal-box{background:#050505;border:1px solid var(--red);padding:40px;width:min(420px,90vw);box-shadow:var(--glow-r);text-align:center;position:relative;animation:modalIn .3s ease;}
+@keyframes modalIn{from{transform:scale(.9);opacity:0;}to{transform:scale(1);opacity:1;}}
+.modal-title{font-family:'Rubik Glitch',cursive;font-size:22px;color:var(--red-bright);letter-spacing:2px;margin-bottom:6px;}
+.modal-sub{font-size:9px;color:#ddd;letter-spacing:3px;text-transform:uppercase;margin-bottom:28px;}
+#admin-pass{width:100%;background:#000;border:1px solid #333;color:var(--text);padding:13px;font-family:'Source Code Pro',monospace;font-size:15px;letter-spacing:6px;text-align:center;outline:none;margin-bottom:12px;transition:border-color .2s;}
+#admin-pass:focus{border-color:var(--red);}
+#admin-submit{width:100%;background:#000;border:1px solid var(--red);color:#fff;padding:12px;font-family:'Source Code Pro',monospace;font-size:10px;letter-spacing:4px;cursor:pointer;text-transform:uppercase;transition:all .2s;}
+#admin-submit:hover{background:rgba(179,0,0,.15);color:var(--red-bright);}
+#admin-msg{margin-top:16px;font-size:12px;letter-spacing:2px;min-height:22px;font-family:'Rubik Glitch',cursive;}
+#admin-msg.granted{color:var(--green);}
+#admin-msg.denied{color:var(--red-bright);}
+#admin-msg.locked{color:var(--yellow);font-family:'Source Code Pro',monospace;font-size:10px;}
+#admin-att{margin-top:6px;font-size:9px;color:#ddd;letter-spacing:2px;}
+.modal-close{position:absolute;top:12px;right:16px;background:none;border:none;color:#ddd;font-size:18px;cursor:pointer;font-family:monospace;}
+.modal-close:hover{color:var(--red-bright);}
+
+#sorry-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.98);z-index:9500;align-items:center;justify-content:center;}
+#sorry-modal.open{display:flex;}
+.sorry-box{background:#050505;border:2px solid var(--red-bright);padding:40px;width:min(500px,90vw);text-align:center;box-shadow:var(--glow-r);animation:modalIn .3s ease;}
+.sorry-title{font-family:'Rubik Glitch',cursive;font-size:20px;color:var(--red-bright);margin-bottom:10px;letter-spacing:2px;}
+.sorry-msg{font-size:11px;color:#ddd;margin-bottom:24px;line-height:1.7;letter-spacing:1px;}
+.sorry-msg strong{color:var(--yellow);}
+.sorry-progress{font-size:9px;color:#ddd;letter-spacing:2px;margin-bottom:12px;}
+.sorry-progress span{color:var(--cyan);}
+#sorry-input{width:100%;background:#000;border:1px solid #444;color:#fff;padding:12px;font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:2px;text-align:center;outline:none;margin-bottom:12px;transition:border-color .2s;}
+#sorry-input:focus{border-color:var(--yellow);}
+#sorry-submit{width:100%;background:#000;border:1px solid var(--yellow);color:var(--yellow);padding:11px;font-family:'Source Code Pro',monospace;font-size:10px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;}
+#sorry-submit:hover{background:rgba(255,204,0,.1);}
+#sorry-feedback{margin-top:12px;font-size:10px;color:var(--red-bright);letter-spacing:2px;min-height:16px;}
+
+footer{border-top:1px solid #1a1a1a;padding:60px 24px 40px;text-align:center;font-size:10px;color:#ddd;letter-spacing:2px;}
+.footer-logo{font-family:'Rubik Glitch',cursive;font-size:34px;color:#333;display:block;margin-bottom:20px;}
+footer a{color:var(--cyan);text-decoration:none;}
+#back-top{display:inline-block;margin-top:24px;background:transparent;border:1px solid #444;color:#ddd;padding:9px 22px;font-family:'Source Code Pro',monospace;font-size:9px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;text-decoration:none;transition:all .2s;}
+#back-top:hover{border-color:var(--cyan);color:var(--cyan);}
+
+#toast-wrap{position:fixed;bottom:24px;right:24px;z-index:8000;display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:310px;}
+.toast{background:#080808;border:1px solid #222;border-left:3px solid var(--cyan);padding:9px 13px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;opacity:0;transform:translateX(16px);animation:tin .35s ease forwards,tout .4s ease 4.6s forwards;line-height:1.6;}
+.toast .t-cat{font-size:7px;letter-spacing:3px;opacity:.7;margin-bottom:2px;display:block;}
+.toast .t-msg{color:#fff;}
+.toast.red{border-left-color:var(--red-bright);}.toast.red .t-cat{color:var(--red-bright);}
+.toast.blue{border-left-color:var(--cyan);}.toast.blue .t-cat{color:var(--cyan);}
+.toast.yellow{border-left-color:var(--yellow);}.toast.yellow .t-cat{color:var(--yellow);}
+.toast.green{border-left-color:var(--green);}.toast.green .t-cat{color:var(--green);}
+.toast.purple{border-left-color:#cc88ff;}.toast.purple .t-cat{color:#cc88ff;}
+.toast.white{border-left-color:#fff;}.toast.white .t-cat{color:#fff;}
+.toast.black{border-left-color:#888;}.toast.black .t-cat{color:#ddd;}
+@keyframes tin{to{opacity:1;transform:none;}}
+@keyframes tout{to{opacity:0;transform:translateX(16px);}}
+
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:none;}
+
+@media(max-width:640px){
+  .nav-links{display:none;}
+  .records-table{font-size:10px;}
+  .records-table th,.records-table td{padding:7px;}
+  .section{padding:60px 16px;}
+}
+</style>
+</head>
+<body>
+
+<div id="boot"><div class="boot-inner" id="boot-lines"></div></div>
+<div id="toast-wrap"></div>
+
+<!-- ADMIN MODAL -->
+<div id="admin-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAdmin()">✕</button>
+    <div class="modal-title">ADMIN ACCESS</div>
+    <div class="modal-sub">// enter authorization code</div>
+    <input type="password" id="admin-pass" placeholder="········" maxlength="30" autocomplete="off">
+    <button id="admin-submit" onclick="checkAdmin()">AUTHENTICATE</button>
+    <div id="admin-msg"></div>
+    <div id="admin-att"></div>
+  </div>
+</div>
+
+<!-- SORRY MODAL -->
+<div id="sorry-modal">
+  <div class="sorry-box">
+    <div class="sorry-title">🚨 ACCESS VIOLATION</div>
+    <div class="sorry-msg">yo you tryna hack into the admin panel? nahh you a bum fr<br><br>type this <strong>3 times</strong> to get back in:<br><strong style="color:var(--red-bright);">"i am sorry for hacking into webs"</strong></div>
+    <div class="sorry-progress">completed: <span id="sorry-count">0</span> / 3</div>
+    <input type="text" id="sorry-input" placeholder="type it here..." autocomplete="off" onpaste="return false;" oncopy="return false;" oncut="return false;" oncontextmenu="return false;">
+    <button id="sorry-submit" onclick="checkSorry()">SUBMIT</button>
+    <div id="sorry-feedback"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <div class="nav-logo">WEBS 🌐</div>
+    <div class="nav-shortcuts">
+      <a href="chat.html" class="nav-shortcut green">💬 CHAT</a>
+      <a href="adminpanel.html" class="nav-shortcut red">🔐 ADMIN PANEL</a>
+      <a href="https://docs.google.com/document/d/1v_IOvqJER51bTeNJrvQtZ2esQMLbo5RpLKQHfxY50zk/edit?tab=t.0" target="_blank" class="nav-shortcut yellow">📄 WEBS DOC</a>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#ranks">RANKS</a></li>
+    <li><a href="#records">RECORDS</a></li>
+    <li><a href="#challenges">CHALLENGES</a></li>
+    <li><a href="#tags">TAGS</a></li>
+    <li><a href="#hinthub">HINT HUB</a></li>
+    <li><a href="#terms">TERMS</a></li>
+    <li><a href="#terminal">TERMINAL</a></li>
+  </ul>
+</nav>
+
+<div class="ticker-wrap" style="margin-top:72px;">
+  <div class="ticker">
+    <span class="ticker-item">SEASON TWO — RE-WIRED <span>ACTIVE</span></span>
+    <span class="ticker-item">MEMBERS: <span>136</span></span>
+    <span class="ticker-item">RECORDS: <span>8 VERIFIED</span></span>
+    <span class="ticker-item">CHALLENGES: <span>4 ACTIVE</span></span>
+    <span class="ticker-item">SENTINELS: <span>5</span></span>
+    <span class="ticker-item">THE SYSTEM DOES NOT FORGET. IT ONLY UPDATES.</span>
+    <span class="ticker-item">SEASON TWO — RE-WIRED <span>ACTIVE</span></span>
+    <span class="ticker-item">MEMBERS: <span>136</span></span>
+    <span class="ticker-item">RECORDS: <span>8 VERIFIED</span></span>
+    <span class="ticker-item">CHALLENGES: <span>4 ACTIVE</span></span>
+    <span class="ticker-item">SENTINELS: <span>5</span></span>
+    <span class="ticker-item">THE SYSTEM DOES NOT FORGET. IT ONLY UPDATES.</span>
+  </div>
+</div>
+
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-eyebrow">🌐 Season Two — Classified Network</div>
+  <div class="hero-title" data-text="WEBS">WEBS</div>
+  <div class="hero-sub">RE-WIRED // THE SYSTEM IS ALWAYS WATCHING</div>
+  <div class="hero-stats">
+    <div class="stat-block"><span class="stat-num" id="stat-members">136</span><span class="stat-label">Members</span></div>
+    <div class="stat-block"><span class="stat-num">8</span><span class="stat-label">Records</span></div>
+    <div class="stat-block"><span class="stat-num">4</span><span class="stat-label">Challenges</span></div>
+    <div class="stat-block"><span class="stat-num">5</span><span class="stat-label">Sentinels</span></div>
+  </div>
+  <div class="hero-pills">
+    <div class="hero-pill active">STATUS: ACTIVE</div>
+    <div class="hero-pill active">SEASON TWO</div>
+    <div class="hero-pill">NODES: ONLINE</div>
+  </div>
+  <div class="scroll-cue">▼ scroll to initialize ▼</div>
+</section>
+
+<hr class="divider">
+
+<section class="section reveal" id="ranks">
+  <div class="section-label">01 // Classification Protocol</div>
+  <div class="section-title">Rank System</div>
+  <div class="section-desc">// scanned → terminal → sentinel — earn your place</div>
+  <div class="rank-grid">
+    <div class="rank-card"><div class="rank-tier">Tier I</div><div class="rank-name">SCANNED 👁️</div><div class="rank-desc">You've been detected. The system knows you exist. Entry-level — flagged but not yet classified.</div></div>
+    <div class="rank-card"><div class="rank-tier">Tier II</div><div class="rank-name">INDEXED 🗃️</div><div class="rank-desc">You are stored, categorized, and tracked in silence. The system has a full file on you.</div></div>
+    <div class="rank-card"><div class="rank-tier">Tier III</div><div class="rank-name">QUARANTINED 👾</div><div class="rank-desc">Your activity is being restricted and contained. Movement monitored and limited by the system.</div></div>
+    <div class="rank-card"><div class="rank-tier">Tier IV</div><div class="rank-name">CONTAINED 🫙</div><div class="rank-desc">Fully locked in. The system has full control of your node. All output filtered through WEBS.</div></div>
+    <div class="rank-card"><div class="rank-tier">Tier V</div><div class="rank-name">PURGED 🧨</div><div class="rank-desc">Critical threat designation. Data marked for erasure. Active system countermeasures deployed.</div></div>
+    <div class="rank-card"><div class="rank-tier">Tier VI</div><div class="rank-name">TERMINAL 💀</div><div class="rank-desc">You are no longer a user. You are the system. Undetectable, uncontainable. Beyond classification.</div></div>
+    <div class="rank-card"><div class="rank-tier">Tier VII — Editors Only</div><div class="rank-name">SENTINEL ★</div><div class="rank-desc">Above the system. You don't just use WEBS — you built it. Reserved exclusively for editors and administrators.</div></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section reveal" id="records">
+  <div class="section-label">02 // Verified Achievement Database</div>
+  <div class="section-title">System Records</div>
+  <div class="section-desc">// if it's here, it has not been surpassed</div>
+  <div class="records-filters">
+    <button class="filter-btn active" onclick="filterRec('all',this)">ALL</button>
+    <button class="filter-btn" onclick="filterRec('racing',this)">🏁 RACING</button>
+    <button class="filter-btn" onclick="filterRec('sports',this)">⚽ SPORTS</button>
+    <button class="filter-btn" onclick="filterRec('arcade',this)">🤹 ARCADE</button>
+    <button class="filter-btn" onclick="filterRec('idle',this)">🍪 IDLE</button>
+    <button class="filter-btn" onclick="filterRec('shooter',this)">🔫 SHOOTER</button>
+  </div>
+  <table class="records-table">
+    <thead><tr><th>Player</th><th>Rank</th><th>Record</th><th>Date</th><th>Cat</th></tr></thead>
+    <tbody id="rec-body">
+      <tr class="cat-row" data-cat="racing"><td colspan="5" class="cat-header">🏁 Racing / Track</td></tr>
+      <tr data-cat="racing"><td><div class="rec-player">ARJUN JACHAK</div><div class="rec-tags"><span class="rec-tag sp">OG💯</span></div></td><td><span class="rank-badge badge-scanned">SCANNED</span></td><td>Poly Track — Desert 4</td><td>Jan 30 2026</td><td style="color:#ddd;font-size:9px;">RACING</td></tr>
+      <tr data-cat="racing"><td><div class="rec-player">DECLAN AUSTIN</div><div class="rec-tags"><span class="rec-tag sp">OG💯</span><span class="rec-tag sp">SHERLOCK🔎</span><span class="rec-tag">SPEED💨</span></div></td><td><span class="rank-badge badge-indexed">INDEXED</span></td><td>Poly Track — Winter 4</td><td>May 1 2026</td><td style="color:#ddd;font-size:9px;">RACING</td></tr>
+      <tr data-cat="racing"><td><div class="rec-player">DECLAN AUSTIN</div><div class="rec-tags"><span class="rec-tag sp">OG💯</span><span class="rec-tag sp">SHERLOCK🔎</span><span class="rec-tag">SPEED💨</span></div></td><td><span class="rank-badge badge-indexed">INDEXED</span></td><td>Speed Stars — 100m Dash</td><td>Apr 30 2026</td><td style="color:#ddd;font-size:9px;">RACING</td></tr>
+      <tr data-cat="racing"><td><div class="rec-player">RILEY WAYMAN</div><div class="rec-tags"><span class="rec-tag sp">OG💯</span><span class="rec-tag sp">SHERLOCK🔎</span></div></td><td><span class="rank-badge badge-sentinel">SENTINEL ★</span></td><td>Poly Track — Track 9</td><td>Apr 13 2026</td><td style="color:#ddd;font-size:9px;">RACING</td></tr>
+      <tr data-cat="racing"><td><div class="rec-player">DECLAN AUSTIN</div><div class="rec-tags"><span class="rec-tag sp">OG💯</span><span class="rec-tag sp">SHERLOCK🔎</span><span class="rec-tag">SPEED💨</span></div></td><td><span class="rank-badge badge-indexed">INDEXED</span></td><td>Speed Stars — 200m Dash</td><td>May 9 2026</td><td style="color:#ddd;font-size:9px;">RACING</td></tr>
+      <tr class="cat-row" data-cat="sports"><td colspan="5" class="cat-header">⚽ Sports</td></tr>
+      <tr data-cat="sports"><td><div class="rec-player">HARSHITH PYDI</div><div class="rec-tags"><span class="rec-tag sp">OG💯</span><span class="rec-tag sp">SHERLOCK🔎</span></div></td><td><span class="rank-badge badge-scanned">SCANNED</span></td><td>NFL Perry, NBA Game Mode</td><td>May 12 2026</td><td style="color:#ddd;font-size:9px;">SPORTS</td></tr>
+      <tr class="cat-row" data-cat="arcade"><td colspan="5" class="cat-header">🤹 Arcade / Skill</td></tr>
+      <tr data-cat="arcade"><td><div class="rec-player">ALFREDO GONZALEZ-MARTINEZ</div><div class="rec-tags"><span class="rec-tag sp">OG💯</span></div></td><td><span class="rank-badge badge-scanned">SCANNED</span></td><td>Snow Rider 3D</td><td>Apr 5 2026</td><td style="color:#ddd;font-size:9px;">ARCADE</td></tr>
+      <tr data-cat="arcade"><td><div class="rec-player">RILEY WAYMAN</div><div class="rec-tags"><span class="rec-tag sp">OG💯</span><span class="rec-tag sp">SHERLOCK🔎</span></div></td><td><span class="rank-badge badge-sentinel">SENTINEL ★</span></td><td>Golf Orbit</td><td>Apr 16 2026</td><td style="color:#ddd;font-size:9px;">ARCADE</td></tr>
+      <tr class="cat-row" data-cat="idle"><td colspan="5" class="cat-header">🍪 Idle / Clicking</td></tr>
+      <tr class="empty-row" data-cat="idle"><td colspan="5">None yet — it's your chance to shine 🤖</td></tr>
+      <tr class="cat-row" data-cat="shooter"><td colspan="5" class="cat-header">🔫 Shooter / Fighting</td></tr>
+      <tr class="empty-row" data-cat="shooter"><td colspan="5">None yet — it's your chance to shine 🤖</td></tr>
+    </tbody>
+  </table>
+  <div class="submit-box">📡 submit new record → <a href="mailto:126300@melissaisd.org">126300@melissaisd.org</a> or <a href="mailto:mysteries5g@gmail.com">mysteries5g@gmail.com</a></div>
+</section>
+
+<hr class="divider">
+
+<section class="section reveal" id="challenges">
+  <div class="section-label">03 // Testing Layer</div>
+  <div class="section-title">Active Challenges</div>
+  <div class="section-desc">// complete the mission — claim the tag — first 3 only</div>
+  <div id="challenges-container"></div>
+</section>
+
+<hr class="divider">
+
+<section class="section reveal" id="tags">
+  <div class="section-label">04 // Earned Designations</div>
+  <div class="section-title">Tag Registry</div>
+  <div class="section-desc">// hover to learn — * = unavailable</div>
+  <div id="tags-container"></div>
+</section>
+
+<hr class="divider">
+
+<section class="section reveal" id="hinthub">
+  <div class="section-label">05 // System Signals</div>
+  <div class="section-title">💡 Hint Hub</div>
+  <div class="section-desc">// updates, tips, and scattered signals</div>
+  <div class="hint-intro"><strong>HINT HUB</strong> is where the system drops updates, hints, and scattered signals across WEBS. Some messages are direct, others are hidden in plain sight. Pay attention — important clues about games, challenges, and hidden objectives may appear here at any time.</div>
+  <div class="hints-grid">
+    <div class="hint-card"><div class="hint-num">SIGNAL 01</div><div class="hint-title">🔗 Blocked Links</div><div class="hint-body">If any links are blocked:<ol><li>Open a <a href="https://docs.google.com/document/d/1v_IOvqJER51bTeNJrvQtZ2esQMLbo5RpLKQHfxY50zk/edit?tab=t.510qolvwx0cp" target="_blank">proxy</a>.</li><li>Insert the URL into the search bar.</li><li>Use the site normally.</li></ol><div class="hint-note">Links blocked on Chromebooks may work on PCs.</div></div></div>
+    <div class="hint-card"><div class="hint-num">SIGNAL 02</div><div class="hint-title">🍕 Make Your Own Pizza Edition</div><div class="hint-body">Support WEBS and earn the <strong style="color:var(--yellow)">MOD</strong> tag.<ol><li>Watch: <a href="https://www.youtube.com/watch?v=IlLFVX8mkhg" target="_blank">Make a Pizza (YouTube)</a></li><li>Make your Pizza Edition.</li><li>Share it via email.</li></ol></div></div>
+    <div class="hint-card"><div class="hint-num">SIGNAL 03</div><div class="hint-title">💻 Make Your Own Website</div><div class="hint-body">Want to build something like WEBS?<ol><li>Go to <a href="http://neocities.org" target="_blank">Neocities</a>.</li><li>Learn with <a href="http://freecodecamp.org" target="_blank">FCC</a>, <a href="http://claude.ai" target="_blank">Claude</a>, or <a href="http://chatgpt.com" target="_blank">ChatGPT</a>.</li><li>Watch tutorials on <a href="http://youtube.com" target="_blank">YouTube</a>.</li></ol></div></div>
+    <div class="hint-card"><div class="hint-num">SIGNAL 04</div><div class="hint-title">📚 Teacher Says "No Wikipedia"</div><div class="hint-body">Bypass it like a pro:<ol><li>Search your topic on Wikipedia.</li><li>Find "References" in the right sidebar.</li><li>Below "Notes", above "Further readings".</li><li>Cite those actual sources.</li></ol></div></div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section reveal" id="terms">
+  <div class="section-label">06 // Rules & Enforcement</div>
+  <div class="section-title">Terms & Conditions</div>
+  <div class="section-desc">// by using WEBS you agree to all rules — system may update without warning</div>
+  <div class="terms-layout">
+    <div class="terms-block"><div class="terms-block-title">⚙️ System Rules</div><ul class="terms-list"><li>All activity must follow challenge and game instructions exactly</li><li>Do not cheat, exploit, or fake results</li><li>Only real proof will be accepted</li><li>The system can change rules without warning</li><li>All final decisions belong to WEBS administration</li></ul></div>
+    <div class="terms-block"><div class="terms-block-title">🎯 Events & Challenges</div><ul class="terms-list"><li>Every challenge must be completed exactly as stated</li><li>Video proof is required for most challenges</li><li>Screenshots accepted only when specified</li><li>Unclear, edited, or cropped proof will be rejected</li><li>Submit through the correct form or email</li></ul></div>
+    <div class="terms-block"><div class="terms-block-title">🏆 Records Rules</div><ul class="terms-list"><li>Records must be the highest verified performance</li><li>Proof must show the full attempt clearly</li><li>Fake, duplicated, or edited records are not allowed</li><li>Records can be challenged by other users</li><li>Final approval is decided by the system</li></ul></div>
+    <div class="terms-block"><div class="terms-block-title">📸 Proof Rules</div><ul class="terms-list"><li>Video proof is preferred for all submissions</li><li>Screenshots allowed only if stated in the challenge</li><li>No editing, cutting, or fake overlays allowed</li><li>If proof is unclear → automatic rejection</li></ul></div>
+    <div class="terms-block"><div class="terms-block-title">🚨 Penalty System</div><ul class="terms-list"><li>First violation → warning issued</li><li>Repeated violations → submission bans</li><li>Severe abuse → permanent system ban</li></ul><div style="margin-top:10px;font-size:10px;color:#ddd;padding:8px 0;border-top:1px solid #1a1a1a;">The system decides all penalty outcomes.</div></div>
+    <div class="terms-block"><div class="terms-block-title">🎰 Lottery System</div><ul class="terms-list"><li>Entry based on challenges and submissions</li><li>Google Forms used for all entries</li><li>Winners selected randomly</li><li>Rewards may include tags, entries, or special status</li></ul></div>
+  </div>
+  <div class="banned-box">
+    <div class="banned-title">🚫 Banned / Restricted Members</div>
+    <div class="banned-entry">KANAY GANDIGUDI — RESTRICTED/BANNED</div>
+    <div class="banned-entry" style="color:var(--yellow);">VIHAN GOYAL — WATCH LIST 👁️</div>
+  </div>
+  <div class="contact-box">
+    <div class="contact-title">📤 Submissions & Contact</div>
+    <div class="contact-entry">📧 <a href="mailto:126300@melissaisd.org">126300@melissaisd.org</a></div>
+    <div class="contact-entry">📧 <a href="mailto:mysteries5g@gmail.com">mysteries5g@gmail.com</a></div>
+    <div class="contact-entry">📋 Or official Google Forms (linked in WEBS)</div>
+    <div style="margin-top:12px;font-size:10px;color:#ddd;padding-top:10px;border-top:1px solid #1a1a1a;">Include: Your name · Challenge/record name · Proof attached</div>
+  </div>
+  <div class="final-rule">
+    <strong>⚫ FINAL RULE</strong>
+    By participating in WEBS, you accept all current and future system rules without exception.<br><br>
+    WEBS: REWIRED is a fictional game system created for entertainment and community participation. All themes, ranks, warnings, and system messages are part of the game's storyline and are not connected to any real monitoring, tracking, or official records.
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section reveal" id="terminal">
+  <div class="section-label">07 // Secure Shell</div>
+  <div class="section-title">System Terminal</div>
+  <div class="section-desc">// WEBS-OS v2.0 — all sessions logged</div>
+  <div class="term-box">
+    <div class="term-bar"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div><div class="tlabel">WEBS-OS v2.0 — SECURE SHELL</div></div>
+    <div class="term-body">
+      <span class="tl"><span class="tp">WEBS-OS $</span> <span class="tc2">./boot --season=2 --mode=rewired</span></span>
+      <span class="tl tg2">[ OK ] WEBS: RE-WIRED initialized...</span>
+      <span class="tl tg2">[ OK ] Rank classification engine loaded</span>
+      <span class="tl tg2">[ OK ] Record database: 8 entries verified</span>
+      <span class="tl tg2">[ OK ] Challenge nodes: 4 active</span>
+      <span class="tl tg2">[ OK ] Tag registry: 15 tags online</span>
+      <span class="tl tb">.</span>
+      <span class="tl"><span class="tp">WEBS-OS $</span> <span class="tc2">./status --system</span></span>
+      <span class="tl tok">[ OK ] WEBS SYSTEM STATUS: STABLE</span>
+      <span class="tl tok">[ OK ] INTEGRITY: 100%</span>
+      <span class="tl tok">[ OK ] "THE SYSTEM DOES NOT FORGET. IT ONLY UPDATES."</span>
+      <span class="tl tb">.</span>
+      <span class="tl tcur"><span class="tp">WEBS-OS $</span> </span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-logo">WEBS</span>
+  want to create a site like this? email <a href="mailto:126300@melissaisd.org">126300@melissaisd.org</a>
+  <br><br>
+  <a href="chat.html" style="color:var(--green);text-shadow:var(--glow-g);">💬 JOIN THE CHAT NODE</a>
+  <br>
+  <a href="#hero" id="back-top">↑ BACK TO TOP</a>
+  <br><br>
+  <span style="font-size:8px;color:#888;">WEBS: RE-WIRED 🌐 — SEASON TWO — ALL SYSTEMS OPERATIONAL</span>
+</footer>
+
+<script>
+const BOOT=[
+  {t:'WEBS-OS v2.0 BOOT SEQUENCE INITIATED...',c:'bl-w',d:80},
+  {t:'Loading kernel modules...',c:'bl-c',d:260},
+  {t:'[ OK ] Memory allocation: 2048MB',c:'bl-g',d:420},
+  {t:'[ OK ] Network interface: online',c:'bl-g',d:580},
+  {t:'[ OK ] Rank engine: loaded',c:'bl-g',d:740},
+  {t:'[ OK ] Season Two protocols: active',c:'bl-g',d:900},
+  {t:'[ OK ] Challenge nodes: online',c:'bl-g',d:1060},
+  {t:'[ OK ] Tag registry: synced',c:'bl-g',d:1220},
+  {t:'',c:'',d:1380},
+  {t:'SYSTEM READY. WELCOME TO WEBS 🌐',c:'bl-w',d:1480},
+];
+const bootEl=document.getElementById('boot-lines');
+BOOT.forEach(({t,c,d})=>{
+  setTimeout(()=>{
+    const el=document.createElement('div');
+    el.className=`boot-line ${c}`;
+    el.textContent=t||'\u00A0';
+    bootEl.appendChild(el);
+  },d);
+});
+setTimeout(()=>{
+  const b=document.getElementById('boot');
+  b.classList.add('out');
+  setTimeout(()=>b.remove(),1000);
+  spawnParticles();
+},2000);
+
+function spawnParticles(){
+  const colors=['var(--cyan)','var(--red-bright)','var(--green)','#fff'];
+  for(let i=0;i<25;i++){
+    setTimeout(()=>{
+      const p=document.createElement('div');
+      p.className='particle';
+      const dx=(Math.random()-.5)*200;
+      p.style.cssText=`left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*colors.length)]};--dx:${dx}px;animation-duration:${6+Math.random()*8}s;animation-delay:${Math.random()*5}s;`;
+      document.getElementById('hero').appendChild(p);
+    },i*200);
+  }
+}
+
+function playBeep(freq=440,type='square',dur=0.2,vol=0.05){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type=type;osc.frequency.setValueAtTime(freq,ctx.currentTime);
+    gain.gain.setValueAtTime(vol,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    osc.start();osc.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function playSuccess(){playBeep(523,.2);setTimeout(()=>playBeep(659,.15),120);setTimeout(()=>playBeep(784,.3),240);}
+function playDenied(){playBeep(150,'square',.4,.08);}
+function playClick(){playBeep(800,'sine',.05,.03);}
+function playNotif(){playBeep(600,'sine',.1,.02);}
+
+document.addEventListener('mousemove',e=>{
+  const d=document.createElement('div');
+  d.className='cursor-dot';
+  d.style.cssText=`left:${e.clientX-2.5}px;top:${e.clientY-2.5}px;background:${Math.random()>.85?'var(--red-bright)':'var(--cyan)'};opacity:0.7;`;
+  document.body.appendChild(d);
+  setTimeout(()=>{d.style.opacity='0';setTimeout(()=>d.remove(),150);},80);
+});
+
+const CHALLENGES=[
+  {name:'🥚 HATCHLESS',obj:'Record a video of yourself getting 5 kills in Shell Shockers while only using the spatula. No other weapons allowed.',alt:'',prize:'UNCRACKED🍳 Tag',completion:'Gohith V., Gabriel Munoz'},
+  {name:'⚡ I AM SPEED',obj:'Get a time below 21 seconds on Speed Stars 200m dash. Image or video required.',alt:'ALTERNATIVE: Get below 10 seconds on the 100m dash for the BOLT⚡ tag instead.',prize:'SPEED💨 tag (main) · BOLT⚡ tag (alternative)',completion:'Declan Austin (SPEED)'},
+  {name:'💰 GRAFFITI GOD',obj:'Get 1,000 coins on one run in Subway Surfers. Screenshot your score.',alt:'',prize:'BANKSY💰 Tag',completion:'Abdurrahman S.'},
+  {name:'🏀 JEBRON LAMES',obj:'Win 5-0 against the CPU in Basket Random. Perfect shutout. No mercy. Video proof required.',alt:'',prize:'KOBE🏀 Tag + S2 Lottery Entry ×2',completion:'Harshith Pydi, Riley Wayman, Nathan Floreal'},
+];
+
+function loadChallenges(){
+  const container=document.getElementById('challenges-container');
+  const grid=document.createElement('div');
+  grid.className='challenges-grid';
+  CHALLENGES.forEach(ch=>{
+    const names=ch.completion.trim();
+    const count=names.split(',').length;
+    const isClosed=count>=3;
+    const statusCls=isClosed?'s-closed':names&&names.toLowerCase()!=='n/a'?'s-partial':'s-open';
+    const statusTxt=isClosed?'CLOSED':names&&names.toLowerCase()!=='n/a'?'PARTIAL':'OPEN';
+    grid.innerHTML+=`<div class="ch-card">
+      <div class="ch-name">${ch.name}</div>
+      <div class="ch-obj">${ch.obj}</div>
+      ${ch.alt?`<div class="ch-alt">${ch.alt}</div>`:''}
+      <div class="ch-prize">${ch.prize}</div>
+      <div class="ch-row">
+        <span class="ch-status ${statusCls}">${statusTxt}</span>
+        <span class="ch-completions">Completions: <span>${names||'N/A'}</span></span>
+      </div>
+    </div>`;
+  });
+  container.innerHTML='';
+  container.appendChild(grid);
+}
+
+function loadTags(){
+  const container=document.getElementById('tags-container');
+  container.innerHTML=`
+    <div class="tag-section-head">⚡ Challenge Tags</div>
+    <div class="tags-wrap">
+      <div class="tag tc">SPEED💨<div class="tag-tip">Do the Speed Stars 200m dash challenge in under 21 seconds.</div></div>
+      <div class="tag tc">BOLT⚡<div class="tag-tip">Do the Speed Stars 100m dash alternative challenge in under 10 seconds.</div></div>
+      <div class="tag tc">KOBE🏀<div class="tag-tip">Shut out the CPU 5-0 in Basket Random. Pure court dominance. No mercy.</div></div>
+      <div class="tag tc">UNCRACKED🍳<div class="tag-tip">Do the Shell Shockers challenge — 5 spatula kills only. You stayed uncracked.</div></div>
+    </div>
+    <div class="tag-section-head">🔎 Special Tags</div>
+    <div class="tags-wrap">
+      <div class="tag ts unavail">SHERLOCK🔎*<div class="tag-tip">Go to the secret site. Currently unavailable — keep looking.</div></div>
+      <div class="tag ts unavail">OG💯*<div class="tag-tip">Be one of the first 100 members. This window has closed.</div></div>
+      <div class="tag ts">GLITCH<div class="tag-tip">Send an image of <a href="http://projectdeltaisbuns.neocities.org" target="_blank">projectdeltaisbuns.com</a> or <a href="https://sites.google.com/melissaisd.org/projectdeltaischeeks/home" target="_blank">projectdeltaischeeks.com</a>.</div></div>
+      <div class="tag ts">Sleepless☕<div class="tag-tip">Log on every day for one week straight. The system never sleeps and neither do you.</div></div>
+      <div class="tag ts">DOMINION👑<div class="tag-tip">Earn 10 tags. You own the leaderboard. Undisputed.</div></div>
+      <div class="tag ts">SPAMMER📨<div class="tag-tip">Send the WEBS doc to 10 people. High-volume. You don't stop.</div></div>
+      <div class="tag ts">A-MAX🖖<div class="tag-tip">Fill out the <a href="https://forms.gle/fNJUWDUW6FQsm1ux5" target="_blank">#StopProjectDelta Google Form</a>.</div></div>
+    </div>
+    <div class="tag-section-head">🎮 Game Tags</div>
+    <div class="tags-wrap">
+      <div class="tag tg">MOGGER🤫<div class="tag-tip">Get a 5-streak on <a href="http://omogglegame.com" target="_blank">Omoggle</a> against random people. Video or picture required.</div></div>
+      <div class="tag tg">FAST HANDS🫲🤪🫱<div class="tag-tip">Score over 300 on <a href="http://67speed.com" target="_blank">67speed.com</a>. Video proof required. Creator's PR is 317. Use a <a href="https://docs.google.com/document/d/1v_IOvqJER51bTeNJrvQtZ2esQMLbo5RpLKQHfxY50zk/edit?tab=t.510qolvwx0cp" target="_blank">proxy</a> if blocked.</div></div>
+      <div class="tag tg">DUO🤝<div class="tag-tip">Beat a multiplayer challenge with another WEBS member. Image required.</div></div>
+      <div class="tag tg">High Roller⚽<div class="tag-tip">Get a highscore of 1000+ on Slope 2. Proof required.</div></div>
+    </div>`;
+}
+
+function filterRec(cat,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  playClick();
+  document.querySelectorAll('#rec-body tr').forEach(row=>{
+    row.style.display=(cat==='all'||row.dataset.cat===cat)?'':'none';
+  });
+}
+
+const revealObserver=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');playBeep(300,'sine',.05,.01);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>revealObserver.observe(el));
+
+let attempts=0,locked=false;
+function openAdmin(){document.getElementById('admin-modal').classList.add('open');playClick();}
+function closeAdmin(){
+  document.getElementById('admin-modal').classList.remove('open');
+  document.getElementById('admin-msg').textContent='';
+  document.getElementById('admin-msg').className='';
+  document.getElementById('admin-pass').value='';
+  document.getElementById('admin-att').textContent='';
+}
+function checkAdmin(){
+  if(locked)return;
+  const pass=document.getElementById('admin-pass').value;
+  const msg=document.getElementById('admin-msg');
+  const att=document.getElementById('admin-att');
+  if(pass==='websisthe67goat'){
+    playSuccess();
+    msg.textContent='ACCESS GRANTED — REDIRECTING...';
+    msg.className='granted';
+    att.textContent='';
+    setTimeout(()=>{window.location.href='adminpanel.html';},1200);
+  }else{
+    playDenied();
+    attempts++;
+    if(attempts>=3){
+      locked=true;
+      closeAdmin();
+      openSorry();
+    }else{
+      msg.textContent='ACCESS DENIED';
+      msg.className='denied';
+      att.textContent=`${3-attempts} attempt(s) remaining`;
+    }
+  }
+}
+document.getElementById('admin-pass').addEventListener('keydown',e=>{if(e.key==='Enter')checkAdmin();});
+document.getElementById('admin-modal').addEventListener('click',function(e){if(e.target===this)closeAdmin();});
+
+let sorryCount=0;
+const SORRY_TEXT='i am sorry for hacking into webs';
+function openSorry(){document.getElementById('sorry-modal').classList.add('open');}
+function checkSorry(){
+  const input=document.getElementById('sorry-input');
+  const feedback=document.getElementById('sorry-feedback');
+  const val=input.value.trim().toLowerCase();
+  if(val===SORRY_TEXT){
+    sorryCount++;
+    document.getElementById('sorry-count').textContent=sorryCount;
+    input.value='';
+    playBeep(523,'sine',.15);
+    if(sorryCount>=3){
+      feedback.textContent='';
+      document.getElementById('sorry-modal').classList.remove('open');
+      locked=false;attempts=0;sorryCount=0;
+      window.scrollTo({top:0,behavior:'smooth'});
+    }else{
+      feedback.textContent=`✓ ${sorryCount}/3 done. keep going.`;
+      feedback.style.color='var(--green)';
+    }
+  }else{
+    playDenied();
+    feedback.textContent='wrong. type it exactly: "i am sorry for hacking into webs"';
+    feedback.style.color='var(--red-bright)';
+    input.value='';
+  }
+}
+document.getElementById('sorry-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkSorry();});
+
+loadChallenges();
+loadTags();
+
+const NOTIFS=[
+  // DEEP SURVEILLANCE
+  {cat:'SYSTEM INTRUSION',msg:'your keystrokes are being logged in real time.',cls:'red'},
+  {cat:'SYSTEM INTRUSION',msg:'your camera may be accessible. cover it.',cls:'red'},
+  {cat:'SYSTEM INTRUSION',msg:'we have been watching you longer than you think.',cls:'red'},
+  {cat:'SYSTEM INTRUSION',msg:'your IP has been flagged and stored permanently.',cls:'red'},
+  {cat:'SYSTEM INTRUSION',msg:'someone in this network knows who you are.',cls:'red'},
+  {cat:'SYSTEM INTRUSION',msg:'you opened this page. that was not an accident.',cls:'red'},
+  // IDENTITY
+  {cat:'IDENTITY',msg:'your full name is already on file.',cls:'white'},
+  {cat:'IDENTITY',msg:'you have been here before. we never forgot.',cls:'white'},
+  {cat:'IDENTITY',msg:'one of the people listed on this page is watching you right now.',cls:'white'},
+  {cat:'IDENTITY',msg:'you are not as invisible as you believe.',cls:'white'},
+  {cat:'IDENTITY',msg:'your face has been logged from previous sessions.',cls:'white'},
+  // BEHAVIOR
+  {cat:'BEHAVIOR LOG',msg:'you hesitated on that last scroll. noted.',cls:'blue'},
+  {cat:'BEHAVIOR LOG',msg:'reading speed: above average. profile updated.',cls:'blue'},
+  {cat:'BEHAVIOR LOG',msg:'your session is being compared to 47 others.',cls:'blue'},
+  {cat:'BEHAVIOR LOG',msg:'you are not the first person to read this today.',cls:'blue'},
+  {cat:'BEHAVIOR LOG',msg:'inactivity detected. still recording.',cls:'blue'},
+  // SIGNAL
+  {cat:'SIGNAL DETECTED',msg:'a second device in your location is also online.',cls:'yellow'},
+  {cat:'SIGNAL DETECTED',msg:'someone nearby is watching the same page.',cls:'yellow'},
+  {cat:'SIGNAL DETECTED',msg:'your session was briefly accessed by an outside node.',cls:'yellow'},
+  {cat:'SIGNAL DETECTED',msg:'network activity spiked when you arrived.',cls:'yellow'},
+  // THE SYSTEM
+  {cat:'THE SYSTEM',msg:'THE SYSTEM REMEMBERS EVERYTHING YOU CHOSE TO FORGET.',cls:'white'},
+  {cat:'THE SYSTEM',msg:'YOU WERE ALREADY IN THE DATABASE BEFORE YOU JOINED.',cls:'white'},
+  {cat:'THE SYSTEM',msg:'CLOSING THIS TAB WILL NOT REMOVE YOU FROM THE RECORDS.',cls:'white'},
+  {cat:'THE SYSTEM',msg:'WEBS HAS NO OFF SWITCH.',cls:'white'},
+  {cat:'THE SYSTEM',msg:'THE SYSTEM DOES NOT SLEEP. IT WAITS.',cls:'white'},
+  // GLITCH
+  {cat:'GLITCH EVENT',msg:'ERROR: identity verification failed for this session.',cls:'black'},
+  {cat:'GLITCH EVENT',msg:'a record was just modified. we cannot confirm by whom.',cls:'black'},
+  {cat:'GLITCH EVENT',msg:'unknown process is accessing your session memory.',cls:'black'},
+  {cat:'GLITCH EVENT',msg:'one member on this list does not exist.',cls:'black'},
+  {cat:'UNKNOWN',msg:'— — — — — — — — — —',cls:'black'},
+  {cat:'UNKNOWN',msg:'do not look for the hidden page.',cls:'black'},
+  // WARNINGS
+  {cat:'WARNING',msg:'you have been seen. you cannot be unseen.',cls:'yellow'},
+  {cat:'WARNING',msg:'one person on the member list is not a real student.',cls:'yellow'},
+  {cat:'WARNING',msg:'do not share your student ID with anyone in this network.',cls:'yellow'},
+  {cat:'WARNING',msg:'a banned member is attempting to regain access right now.',cls:'yellow'},
+  // HINT
+  {cat:'HINT HUB',msg:'the system has a layer you have not reached yet.',cls:'purple'},
+  {cat:'HINT HUB',msg:'one rank on this page has a double meaning.',cls:'purple'},
+  {cat:'HINT HUB',msg:'there is something hidden in the terminal.',cls:'purple'},
+  {cat:'HINT HUB',msg:'the answer to the secret has been here since day one.',cls:'purple'},
+  // WAR
+  {cat:'WAR ALERT',msg:'project delta operatives may be reading this right now.',cls:'red'},
+  {cat:'WAR ALERT',msg:'do not share WEBS strategies in unsecured channels.',cls:'red'},
+  {cat:'WAR ALERT',msg:'the battle of bush changed everything. stay ready.',cls:'red'},
+];
+let notifQ=[...NOTIFS].sort(()=>Math.random()-.5),nIdx=0;
+function showToast(n){
+  const w=document.getElementById('toast-wrap');
+  const t=document.createElement('div');
+  t.className=`toast ${n.cls}`;
+  t.innerHTML=`<span class="t-cat">${n.cat}</span><span class="t-msg">${n.msg}</span>`;
+  w.appendChild(t);
+  while(w.children.length>4)w.removeChild(w.firstChild);
+  playNotif();
+  setTimeout(()=>t.remove(),5200);
+}
+function nextNotif(){
+  if(nIdx>=notifQ.length){notifQ=[...NOTIFS].sort(()=>Math.random()-.5);nIdx=0;}
+  showToast(notifQ[nIdx++]);
+}
+setTimeout(()=>{
+  nextNotif();
+  const sched=()=>{const d=8000+Math.random()*14000;setTimeout(()=>{nextNotif();sched();},d);};
+  sched();
+},8000);
+
+loadChallenges();
+loadTags();
+</script>
+</body>
+</html>

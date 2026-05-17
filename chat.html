@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WEBS // CHAT NODE 💬</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=Rubik+Wet+Paint&family=Source+Code+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('NdQR8G9rgKaGlmwKe');</script>
+<style>
+:root{
+  --bg:#030303;--text:#f0f0f0;
+  --red:#b30000;--red-bright:#ff2020;
+  --cyan:#00f0ff;--green:#00ff88;--yellow:#ffcc00;
+  --card:#0a0a0a;
+  --glow-r:0 0 10px #b30000,0 0 30px #b3000044;
+  --glow-c:0 0 10px #00f0ff,0 0 30px #00f0ff44;
+  --glow-g:0 0 10px #00ff88,0 0 30px #00ff8844;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:'Source Code Pro',monospace;overflow:hidden;display:flex;flex-direction:column;cursor:none;font-size:16px;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.05) 3px,rgba(0,0,0,.05) 4px);pointer-events:none;z-index:9997;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:#000;}::-webkit-scrollbar-thumb{background:var(--green);}
+
+/* CURSOR */
+#cursor{position:fixed;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);width:20px;height:20px;}
+#cursor::before,#cursor::after{content:'';position:absolute;background:#fff;box-shadow:0 0 4px var(--cyan),0 0 8px var(--cyan);}
+#cursor::before{width:2px;height:14px;left:9px;top:3px;}
+#cursor::after{width:14px;height:2px;left:3px;top:9px;}
+.trail{position:fixed;pointer-events:none;z-index:99998;width:4px;height:4px;border-radius:50%;transform:translate(-50%,-50%);animation:trailFade .5s ease forwards;}
+@keyframes trailFade{0%{opacity:.8;}100%{opacity:0;transform:translate(-50%,-50%) scale(0);}}
+
+/* BOOT */
+#boot-overlay{position:fixed;inset:0;background:#000;z-index:99990;display:flex;align-items:center;justify-content:center;transition:opacity .8s ease;}
+#boot-overlay.out{opacity:0;pointer-events:none;}
+.boot-inner{width:min(520px,90vw);}
+.boot-line{font-size:14px;line-height:2.1;opacity:0;animation:blin .05s ease forwards;}
+.bl-g{color:var(--green);}.bl-r{color:var(--red-bright);}.bl-w{color:#fff;}.bl-c{color:var(--cyan);}
+@keyframes blin{to{opacity:1;}}
+
+/* HEADER */
+header{background:rgba(3,3,3,.97);border-bottom:1px solid var(--green);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;backdrop-filter:blur(12px);animation:hglow 3s ease-in-out infinite alternate;}
+@keyframes hglow{from{border-bottom-color:var(--green);}to{border-bottom-color:#00ff8855;}}
+.header-left{display:flex;align-items:center;gap:16px;}
+.back-btn{color:#ddd;text-decoration:none;font-size:14px;letter-spacing:2px;text-transform:uppercase;transition:all .2s;border:1px solid #555;padding:8px 16px;}
+.back-btn:hover{color:var(--cyan);border-color:var(--cyan);}
+.header-title{font-family:'Rubik Wet Paint',cursive;font-size:22px;color:var(--green);letter-spacing:2px;text-shadow:var(--glow-g);}
+.header-right{display:flex;align-items:center;gap:14px;}
+.online-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:var(--glow-g);animation:pdot 1.5s ease-in-out infinite alternate;}
+@keyframes pdot{from{opacity:.4;}to{opacity:1;}}
+#user-badge{font-size:12px;color:var(--cyan);letter-spacing:1px;padding:5px 12px;border:1px solid var(--cyan);display:none;}
+#signout-btn{font-size:11px;color:#ddd;letter-spacing:1px;padding:5px 12px;border:1px solid #444;background:transparent;cursor:pointer;font-family:'Source Code Pro',monospace;text-transform:uppercase;transition:all .2s;display:none;}
+#signout-btn:hover{border-color:var(--red-bright);color:var(--red-bright);}
+
+/* RULES MODAL */
+#rules-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.98);z-index:9900;overflow-y:auto;padding:32px 24px;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal-inner{max-width:760px;margin:0 auto;}
+.modal-big-title{font-family:'Rubik Glitch',cursive;font-size:28px;color:var(--cyan);letter-spacing:4px;text-align:center;margin-bottom:8px;animation:glitch 5s infinite;}
+@keyframes glitch{0%,90%,100%{transform:none;filter:none;}91%{transform:translateX(-2px);filter:hue-rotate(90deg);}92%{transform:translateX(2px);}93%{transform:none;filter:none;}}
+.modal-sub-title{font-size:13px;color:#ddd;letter-spacing:3px;text-align:center;margin-bottom:28px;text-transform:uppercase;}
+.notice-box{background:#050505;border:1px solid var(--cyan);border-left:4px solid var(--cyan);padding:18px 22px;margin-bottom:24px;font-size:14px;color:#ddd;line-height:1.8;}
+.notice-box strong{color:var(--cyan);font-size:15px;}
+.protocol-card{background:#050505;border:1px solid #222;border-left:4px solid var(--red);padding:16px 20px;margin-bottom:10px;transition:all .25s ease;cursor:default;position:relative;overflow:hidden;}
+.protocol-card:hover{border-color:var(--red-bright);transform:translateX(6px) scale(1.01);box-shadow:var(--glow-r);background:#0a0000;}
+.protocol-num{font-size:10px;letter-spacing:4px;color:var(--red);text-transform:uppercase;margin-bottom:6px;}
+.protocol-title{font-size:14px;color:#fff;font-weight:700;letter-spacing:1px;margin-bottom:6px;}
+.protocol-desc{font-size:13px;color:#ddd;line-height:1.8;}
+.protocol-card:hover .protocol-title{color:var(--red-bright);}
+.protocol-card:hover .protocol-desc{color:#fff;}
+.enforce-box{background:#080000;border:1px solid var(--red);padding:20px 24px;margin:20px 0 24px;}
+.enforce-title{font-size:14px;color:var(--red-bright);letter-spacing:3px;font-weight:700;margin-bottom:12px;text-transform:uppercase;}
+.enforce-body{font-size:13px;color:#ddd;line-height:1.9;}
+.enforce-body span{color:var(--red);}
+.continue-btn{width:100%;background:#000;border:2px solid var(--cyan);color:var(--cyan);padding:16px;font-family:'Source Code Pro',monospace;font-size:13px;letter-spacing:4px;cursor:pointer;text-transform:uppercase;transition:all .3s;}
+.continue-btn:hover{background:rgba(0,240,255,.1);transform:translateY(-2px);}
+
+/* QUIZ */
+#quiz-section{display:none;}
+.quiz-big-title{font-family:'Rubik Glitch',cursive;font-size:26px;color:var(--yellow);letter-spacing:4px;text-align:center;margin-bottom:8px;}
+.quiz-sub{font-size:13px;color:#ddd;letter-spacing:3px;text-align:center;margin-bottom:28px;text-transform:uppercase;}
+.q-card{background:#050505;border:1px solid #222;border-left:4px solid var(--yellow);padding:18px 22px;margin-bottom:16px;transition:all .2s;}
+.q-card:hover{border-color:var(--yellow);}
+.q-text{font-size:14px;color:#fff;line-height:1.7;margin-bottom:14px;font-weight:600;}
+.q-opt{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border:1px solid #1a1a1a;margin-top:8px;transition:all .2s;font-size:13px;color:#ddd;}
+.q-opt:hover{border-color:var(--yellow);background:rgba(255,204,0,.06);color:#fff;}
+.q-opt input{accent-color:var(--yellow);width:14px;height:14px;flex-shrink:0;}
+.submit-btn{width:100%;background:#000;border:2px solid var(--yellow);color:var(--yellow);padding:16px;font-family:'Source Code Pro',monospace;font-size:13px;letter-spacing:4px;cursor:pointer;text-transform:uppercase;transition:all .3s;margin-top:8px;}
+.submit-btn:hover{background:rgba(255,204,0,.1);transform:translateY(-2px);}
+#quiz-result{margin-top:20px;text-align:center;font-size:14px;letter-spacing:2px;min-height:24px;line-height:1.8;}
+
+/* SIGN IN SCREEN */
+#signin-screen{flex:1;display:none;align-items:center;justify-content:center;padding:32px;}
+#signin-screen.active{display:flex;}
+.signin-box{background:#050505;border:1px solid var(--green);padding:50px 44px;width:min(480px,95vw);box-shadow:var(--glow-g);animation:boxIn .4s ease;text-align:center;}
+@keyframes boxIn{from{transform:scale(.95) translateY(10px);opacity:0;}to{transform:none;opacity:1;}}
+.signin-title{font-family:'Rubik Glitch',cursive;font-size:26px;color:var(--green);margin-bottom:8px;letter-spacing:3px;text-shadow:var(--glow-g);}
+.signin-sub{font-size:13px;color:#ddd;letter-spacing:2px;text-transform:uppercase;margin-bottom:36px;line-height:1.7;}
+.google-btn{
+  display:inline-flex;align-items:center;gap:14px;
+  background:#fff;color:#222;border:none;
+  padding:14px 28px;border-radius:2px;
+  font-family:'Source Code Pro',monospace;font-size:14px;
+  letter-spacing:1px;cursor:pointer;transition:all .2s;
+  font-weight:700;width:100%;justify-content:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.4);
+}
+.google-btn:hover{background:#f0f0f0;transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.5);}
+.google-btn svg{width:20px;height:20px;flex-shrink:0;}
+#signin-error{margin-top:16px;font-size:13px;color:var(--red-bright);letter-spacing:1px;min-height:18px;line-height:1.6;}
+.signin-note{margin-top:20px;font-size:11px;color:#555;letter-spacing:1px;line-height:1.7;}
+
+/* BANNED */
+#banned-screen{flex:1;display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:32px;text-align:center;}
+#banned-screen.active{display:flex;}
+.banned-icon{font-size:64px;}
+.banned-title{font-family:'Rubik Glitch',cursive;font-size:28px;color:var(--red-bright);text-shadow:var(--glow-r);}
+.banned-msg{font-size:14px;color:#ddd;line-height:1.8;max-width:440px;}
+
+/* NOT A MEMBER */
+#notmember-screen{flex:1;display:none;align-items:center;justify-content:center;flex-direction:column;gap:20px;padding:32px;text-align:center;}
+#notmember-screen.active{display:flex;}
+
+/* CHAT */
+#chat-screen{flex:1;display:none;flex-direction:column;overflow:hidden;}
+#chat-screen.active{display:flex;}
+.chat-messages{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:14px;}
+.chat-messages::-webkit-scrollbar{width:3px;}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--green);}
+.sys-msg{text-align:center;font-size:12px;color:#888;letter-spacing:2px;padding:6px 0;text-transform:uppercase;}
+.chat-msg{display:flex;flex-direction:column;gap:4px;animation:msgIn .25s ease;max-width:78%;}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.chat-msg.own{align-self:flex-end;}
+.chat-msg.other{align-self:flex-start;}
+.msg-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.msg-name{font-size:15px;font-weight:700;color:var(--cyan);}
+.msg-name.sentinel{color:#fff;text-shadow:0 0 8px #fff;}
+.msg-name.own-name{color:var(--green);}
+.msg-rank{font-size:9px;padding:2px 7px;border:1px solid;letter-spacing:1px;}
+.mr-sentinel{border-color:#fff;color:#fff;}
+.mr-indexed{border-color:#aa0000;color:#ff8888;}
+.mr-scanned{border-color:#555;color:#ddd;}
+.msg-time{font-size:12px;color:#888;letter-spacing:1px;}
+.msg-bubble{padding:14px 18px;font-size:16px;color:#fff;line-height:1.7;word-break:break-word;border:1px solid #1a1a1a;background:#0d0d0d;}
+.chat-msg.own .msg-bubble{background:rgba(0,255,136,.07);border-color:rgba(0,255,136,.25);}
+.chat-msg.sentinel-msg .msg-bubble{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.2);}
+.chat-input-wrap{border-top:1px solid #111;padding:16px 28px;display:flex;gap:12px;align-items:center;background:#050505;flex-shrink:0;}
+#chat-input{flex:1;background:#000;border:1px solid #333;color:#fff;padding:13px 16px;font-family:'Source Code Pro',monospace;font-size:16px;outline:none;transition:border-color .2s;}
+#chat-input:focus{border-color:var(--green);}
+#chat-input::placeholder{color:#555;}
+#chat-send{background:transparent;border:2px solid var(--green);color:var(--green);padding:13px 22px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:all .2s;white-space:nowrap;}
+#chat-send:hover{background:rgba(0,255,136,.1);}
+.char-count{font-size:12px;color:#555;flex-shrink:0;min-width:38px;text-align:right;}
+
+/* PUNISHMENT */
+#punishment-box{display:none;background:#050000;border:2px solid var(--red-bright);padding:20px 28px;flex-shrink:0;}
+#punishment-box p{font-size:13px;color:#ddd;margin-bottom:12px;line-height:1.7;}
+#punishment-box strong{color:var(--red-bright);}
+#punishment-input{width:100%;background:#000;border:1px solid #333;color:#fff;padding:11px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;}
+#punishment-input:focus{border-color:var(--red-bright);}
+#punishment-submit{background:#000;border:1px solid var(--red-bright);color:var(--red-bright);padding:10px 20px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;}
+#punishment-feedback{font-size:12px;color:var(--yellow);margin-top:8px;min-height:16px;}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="boot-overlay"><div class="boot-inner" id="boot-lines"></div></div>
+
+<!-- RULES MODAL -->
+<div id="rules-modal">
+  <div class="modal-inner">
+    <div id="rules-section">
+      <div class="modal-big-title">WEBS COMMUNICATION PROTOCOLS</div>
+      <div class="modal-sub-title">// read every protocol carefully before continuing</div>
+      <div class="notice-box"><strong>[ SYSTEM NOTICE ]</strong><br>All activity inside WEBS networks is monitored, archived, filtered, and reviewed by administrative systems. Entering WEBS chat confirms automatic agreement to all active protocols.</div>
+      <div id="protocols-list"></div>
+      <div class="enforce-box">
+        <div class="enforce-title">⚠ Enforcement Warning</div>
+        <div class="enforce-body">Violations may result in: Warning Flags · Message Deletion · Temporary Muting · Channel Restrictions · Watch List Placement · Account Suspension · Permanent Removal From WEBS Systems.<br><br><span>Continued violations or severe offenses may result in immediate permanent banning without warning.</span></div>
+      </div>
+      <button class="continue-btn" onclick="showQuiz()">I HAVE READ ALL PROTOCOLS — CONTINUE TO QUIZ ›</button>
+    </div>
+    <div id="quiz-section">
+      <div class="quiz-big-title">VERIFICATION QUIZ</div>
+      <div class="quiz-sub">// score 80% or higher to enter — 4 or 5 correct</div>
+      <div id="quiz-questions"></div>
+      <button class="submit-btn" onclick="submitQuiz()">SUBMIT ANSWERS ›</button>
+      <div id="quiz-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <a href="index.html" class="back-btn">← BACK TO WEBS</a>
+    <a href="adminpanel.html" class="back-btn" style="border-color:#4a1a4a;color:#c084fc;">🔐 ADMIN PANEL</a>
+    <div class="header-title">💬 CHAT NODE</div>
+  </div>
+  <div class="header-right">
+    <div class="online-dot"></div>
+    <div id="user-badge"></div>
+    <button onclick="resetChatLocally()" id="reset-btn" style="display:none;background:transparent;border:1px solid #444;color:#ddd;padding:5px 12px;font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:all .2s;" onmouseover="this.style.borderColor='var(--yellow)';this.style.color='var(--yellow)'" onmouseout="this.style.borderColor='#444';this.style.color='#ddd'">RESET ✕</button>
+    <button id="signout-btn" onclick="signOutUser()" style="display:none;background:transparent;border:1px solid #444;color:#ddd;padding:5px 12px;font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:all .2s;" onmouseover="this.style.borderColor='var(--red-bright)';this.style.color='var(--red-bright)'" onmouseout="this.style.borderColor='#444';this.style.color='#ddd'">SIGN OUT</button>
+  </div>
+</header>
+
+<!-- SIGN IN -->
+<div id="signin-screen">
+  <div class="signin-box">
+    <div class="signin-title">SIGN IN</div>
+    <div class="signin-sub">Use your Melissa ISD school account.<br>Only verified WEBS members can enter.</div>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+      SIGN IN WITH GOOGLE
+    </button>
+    <div id="signin-error"></div>
+    <div style="margin:20px 0 12px;font-size:12px;color:#555;letter-spacing:2px;">— or use admin override —</div>
+    <input type="password" id="chat-override-input" placeholder="admin override code" style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;text-align:center;" autocomplete="off" onkeydown="if(event.key==='Enter')checkChatOverride()">
+    <button onclick="checkChatOverride()" style="width:100%;background:#000;border:1px solid #555;color:#ddd;padding:11px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;" onmouseover="this.style.borderColor='var(--yellow)';this.style.color='var(--yellow)'" onmouseout="this.style.borderColor='#555';this.style.color='#ddd'">USE OVERRIDE</button>
+    <div id="override-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:16px;margin-top:8px;"></div>
+    <div class="signin-note">Only @melissaisd.org accounts are accepted.<br>Override is for admins only.</div>
+  </div>
+</div>
+
+<!-- NOT A MEMBER -->
+<div id="notmember-screen">
+  <div style="font-size:48px;">🚫</div>
+  <div style="font-family:'Rubik Glitch',cursive;font-size:24px;color:var(--red-bright);">NOT IN MEMBER LIST</div>
+  <div style="font-size:14px;color:#ddd;line-height:1.8;max-width:440px;text-align:center;">
+    Your account (<span id="notmember-email" style="color:var(--cyan);"></span>) is not in the WEBS member list.<br><br>
+    Contact <a href="mailto:126300@melissaisd.org" style="color:var(--cyan);">126300@melissaisd.org</a> to get added.
+  </div>
+  <button onclick="signOutUser()" style="background:transparent;border:1px solid #555;color:#ddd;padding:10px 20px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;margin-top:10px;">SIGN OUT</button>
+</div>
+
+<!-- BANNED -->
+<div id="banned-screen">
+  <div class="banned-icon">🚫</div>
+  <div class="banned-title">ACCESS DENIED</div>
+  <div class="banned-msg">Your account has been restricted from the WEBS Chat Node.<br><br>Contact <a href="mailto:126300@melissaisd.org" style="color:var(--cyan);">126300@melissaisd.org</a> to appeal.</div>
+  <button onclick="signOutUser()" style="background:transparent;border:1px solid #555;color:#ddd;padding:10px 20px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;cursor:pointer;text-transform:uppercase;margin-top:10px;">SIGN OUT</button>
+</div>
+
+<!-- CHAT -->
+<div id="chat-screen">
+  <div class="chat-messages" id="chat-messages"></div>
+  <div id="punishment-box">
+    <p><strong>🚨 SPAM DETECTED.</strong> Type the numbers 1 through 30 in order separated by spaces to regain access.</p>
+    <input type="text" id="punishment-input" placeholder="1 2 3 4 5 ..." autocomplete="off">
+    <button id="punishment-submit" onclick="checkPunishment()">SUBMIT</button>
+    <div id="punishment-feedback"></div>
+  </div>
+  <div class="chat-input-wrap" id="chat-input-area">
+    <input type="text" id="chat-input" placeholder="type a message..." maxlength="300" onkeydown="if(event.key==='Enter')sendMessage()" oninput="updateCharCount()">
+    <span class="char-count" id="char-count">300</span>
+    <button id="chat-send" onclick="sendMessage()">SEND ›</button>
+    <button onclick="resetChatLocally()" style="background:transparent;border:1px solid #444;color:#ddd;padding:13px 14px;font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:all .2s;white-space:nowrap;flex-shrink:0;" onmouseover="this.style.borderColor='var(--yellow)';this.style.color='var(--yellow)'" onmouseout="this.style.borderColor='#444';this.style.color='#ddd'" title="Clear chat locally (only you)">RESET ✕</button>
+  </div>
+</div>
+
+<script>
+// ===== FIREBASE INIT (safe - works even if CDN fails) =====
+const firebaseConfig = {
+  apiKey:'AIzaSyCaBHAraPGmdQLxENTPkXLpjEDirDGmJqc',
+  authDomain:'webs-rewired.firebaseapp.com',
+  databaseURL:'https://webs-rewired-default-rtdb.firebaseio.com',
+  projectId:'webs-rewired',
+  storageBucket:'webs-rewired.firebasestorage.app',
+  messagingSenderId:'263629460189',
+  appId:'1:263629460189:web:c29857fabef0f3e9344134'
+};
+
+let auth, db, chatRef, provider;
+let firebaseReady = false;
+
+try {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db = firebase.database();
+  chatRef = db.ref('webs-chat');
+  provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({hd:'melissaisd.org'});
+  firebaseReady = true;
+} catch(e) {
+  console.log('Firebase not available:', e);
+}
+
+// ===== MEMBER LIST =====
+const SENTINELS = ['akshaj jalla','william riley wayman','riley wayman','sriman katangur','venkata sistla','gohith vungarala','krithik varaganti','harshith pydi','rugvedh kasaraneni'];
+
+const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSj2-Rx2rRRWl7YD8SYtXQJA9ZMizTyK1pVrvXwB2q3IgiPnvRNTGt9wmPDhgNHmm_F89aMWQcCCZWJ/pub?gid=0&single=true&output=csv';
+
+// Parse CSV into array of objects
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());
+  return lines.slice(1).map(line => {
+    const vals = []; let cur='', inQ=false;
+    for (const c of line) {
+      if (c==='"') { inQ=!inQ; }
+      else if (c===',' && !inQ) { vals.push(cur.trim()); cur=''; }
+      else cur += c;
+    }
+    vals.push(cur.trim());
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = (vals[i]||'').replace(/^"|"$/g,'').trim());
+    return obj;
+  }).filter(m => m.name && m.name.length > 0);
+}
+
+// Fetch members from sheet — returns array of {name, rank, status}
+async function fetchMembers() {
+  const res = await fetch(SHEET_CSV);
+  const text = await res.text();
+  return parseCSV(text);
+}
+
+// Build ID→name map from email format: extract number from melissaisd email
+// We store members by name and match against email prefix
+let sheetMembers = [];
+
+const BAD_WORDS = ['fuck','shit','bitch','nigger','nigga','faggot','fag','retard','cunt','whore','slut','dick','cock','pussy','bastard','kike','spic','chink','wetback','cracker','dyke','tranny'];
+
+function containsBadWord(text) {
+  const lower = text.toLowerCase().replace(/[^a-z]/g,' ');
+  return BAD_WORDS.some(w => lower.split(/\s+/).includes(w));
+}
+
+let currentUser = null;
+let spamLog = [];
+let warnedOnce = false;
+let punished = false;
+
+// ===== RESET LOCALLY =====
+window.resetChatLocally = function() {
+  sessionStorage.setItem('webs-chat-reset', Date.now().toString());
+  document.getElementById('chat-messages').innerHTML = '<div class="sys-msg">Chat cleared locally. Only visible to you.</div>';
+};
+const CHAT_OVERRIDE = 'websadmin';
+window.checkChatOverride = function() {
+  const val = document.getElementById('chat-override-input').value.trim();
+  const errEl = document.getElementById('override-error');
+  if (val === CHAT_OVERRIDE) {
+    currentUser = { id:'admin', name:'ADMIN', rank:'SENTINEL', email:'admin' };
+    hideAll();
+    document.getElementById('chat-screen').classList.add('active');
+    const badge = document.getElementById('user-badge');
+    badge.textContent = 'ADMIN · SENTINEL';
+    badge.style.display = 'block';
+    document.getElementById('signout-btn').style.display = 'block';
+    document.getElementById('reset-btn').style.display = 'block';
+    document.getElementById('chat-input').placeholder = 'typing as ADMIN...';
+    if (firebaseReady) listenMessages();
+    playAccessGranted();
+  } else {
+    errEl.textContent = '⚠ incorrect override code.';
+    document.getElementById('chat-override-input').value = '';
+  }
+};
+
+// ===== AUTH STATE =====
+if (firebaseReady) {
+  auth.onAuthStateChanged(async user => {
+    if (!user) {
+      document.getElementById('signin-screen').classList.add('active');
+      return;
+    }
+
+  const email = user.email || '';
+  if (!email.endsWith('@melissaisd.org')) {
+    document.getElementById('signin-error').textContent = '⚠ Only @melissaisd.org accounts are allowed.';
+    await auth.signOut();
+    return;
+  }
+
+  const idNum = email.replace('@melissaisd.org','');
+
+  // Fetch member list from Google Sheets
+  let memberName = null;
+  let memberRank = 'SCANNED';
+  let memberStatus = 'chill';
+
+  try {
+    sheetMembers = await fetchMembers();
+    // Primary match: try to find member by ID number embedded in email
+    // Sheet columns: name, rank, tags, status
+    // We check if the ID from email matches known IDs, or match by name
+    let match = null;
+
+    // Try Google display name match first
+    const googleName = (user.displayName||'').toLowerCase().trim();
+    if (googleName) {
+      match = sheetMembers.find(m => {
+        const sheetName = (m.name||'').toLowerCase().trim();
+        if (sheetName === googleName) return true;
+        const sheetParts = sheetName.split(' ');
+        const googleParts = googleName.split(' ');
+        const sheetFirst = sheetParts[0];
+        const googleFirst = googleParts[0];
+        const sheetLast = sheetParts.slice(-1)[0];
+        const googleLast = googleParts.slice(-1)[0];
+        if (sheetFirst === googleFirst && sheetLast === googleLast) return true;
+        // Handle middle names: first matches + any other word matches
+        if (sheetFirst === googleFirst && sheetParts.some(p => p.length > 1 && googleParts.includes(p))) return true;
+        return false;
+      });
+    }
+
+    // Fallback: match by student ID in school email (e.g. 126300@melissaisd.org)
+    if (!match && idNum) {
+      match = sheetMembers.find(m => {
+        const mId = (m.id || m.studentid || m['student id'] || '').toString().trim();
+        return mId && mId === idNum;
+      });
+    }
+
+    if (match) {
+      memberName = match.name; // use full name from sheet
+      memberRank = (match.rank||'SCANNED').toUpperCase();
+      memberStatus = (match.status||'chill').toLowerCase();
+    } else {
+      // Not found in sheet
+      hideAll();
+      document.getElementById('notmember-email').textContent = email;
+      document.getElementById('notmember-screen').classList.add('active');
+      return;
+    }
+  } catch(e) {
+    document.getElementById('signin-error').textContent = '⚠ Could not verify membership. Try again.';
+    await auth.signOut();
+    return;
+  }
+
+  // Check banned
+  if (memberStatus.includes('ban') || memberStatus.includes('restrict')) {
+    hideAll();
+    document.getElementById('banned-screen').classList.add('active');
+    return;
+  }
+
+  // Determine rank
+  let rank = memberRank || 'SCANNED';
+  if (SENTINELS.includes((memberName||'').toLowerCase())) rank = 'SENTINEL';
+  if (idNum === '302591') rank = 'INDEXED';
+
+  currentUser = { id: idNum, name: memberName, rank, email };
+
+  hideAll();
+  document.getElementById('chat-screen').classList.add('active');
+  const badge = document.getElementById('user-badge');
+  badge.textContent = `${memberName} · ${rank}`;
+  badge.style.display = 'block';
+  document.getElementById('signout-btn').style.display = 'block';
+  document.getElementById('chat-input').placeholder = `typing as ${memberName}...`;
+  document.getElementById('reset-btn').style.display = 'block';
+
+  listenMessages();
+  playAccessGranted();
+});
+} else {
+  // Firebase not available — show sign-in screen, override still works
+  document.getElementById('signin-screen').classList.add('active');
+}
+
+function hideAll() {
+  ['signin-screen','notmember-screen','banned-screen','chat-screen'].forEach(id => {
+    document.getElementById(id).classList.remove('active');
+    document.getElementById(id).style.display = '';
+  });
+}
+
+// ===== SIGN IN =====
+window.signInWithGoogle = async function() {
+  const errEl = document.getElementById('signin-error');
+  errEl.textContent = '';
+  if (!firebaseReady) {
+    errEl.textContent = '⚠ Firebase not available. Use the override code below.';
+    return;
+  }
+  try {
+    await auth.signInWithPopup(provider);
+  } catch(e) {
+    if (e.code === 'auth/popup-closed-by-user') return;
+    errEl.textContent = '⚠ Sign in failed. Make sure popups are allowed and try again.';
+  }
+};
+
+window.signOutUser = async function() {
+  if (firebaseReady) await auth.signOut();
+  currentUser = null;
+  spamLog = [];
+  warnedOnce = false;
+  punished = false;
+  document.getElementById('user-badge').style.display = 'none';
+  document.getElementById('signout-btn').style.display = 'none';
+  hideAll();
+  document.getElementById('signin-screen').classList.add('active');
+};
+
+// ===== MESSAGES =====
+function listenMessages() {
+  chatRef.on('value', snap => {
+    const resetTs = parseInt(sessionStorage.getItem('webs-chat-reset') || '0');
+    const data = snap.val();
+    const container = document.getElementById('chat-messages');
+    container.innerHTML = '';
+    if (!data) {
+      container.innerHTML = '<div class="sys-msg">No messages yet. Say something.</div>';
+      return;
+    }
+    const allEntries = Object.entries(data).sort((a,b)=>(a[1].timestamp||0)-(b[1].timestamp||0));
+
+    // Auto-reset at 100 messages
+    if (allEntries.length > 100) {
+      allEntries.slice(0, allEntries.length - 100).forEach(([key]) => db.ref('webs-chat/' + key).remove());
+      return;
+    }
+
+    // Filter out messages before the local reset timestamp
+    const entries = allEntries.filter(([,msg]) => (msg.timestamp||0) > resetTs);
+
+    if (entries.length === 0) {
+      container.innerHTML = '<div class="sys-msg">Chat cleared locally. Only visible to you.</div>';
+      return;
+    }
+
+    entries.forEach(([,msg]) => {
+      if (msg.type === 'system') {
+        const d = document.createElement('div');
+        d.className = 'sys-msg';
+        d.textContent = msg.text;
+        container.appendChild(d); return;
+      }
+      const isOwn = currentUser && msg.email === currentUser.email;
+      const isSentinel = SENTINELS.includes((msg.name||'').toLowerCase());
+      const rankCls = isSentinel?'mr-sentinel':msg.rank==='INDEXED'?'mr-indexed':'mr-scanned';
+      const rankTxt = isSentinel?'SENTINEL ★':msg.rank==='INDEXED'?'INDEXED':'SCANNED';
+      const nameCls = isSentinel?'sentinel':isOwn?'own-name':'';
+      const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) : '';
+      const div = document.createElement('div');
+      div.className = `chat-msg ${isOwn?'own':'other'}${isSentinel?' sentinel-msg':''}`;
+      div.innerHTML = `
+        <div class="msg-header">
+          <span class="msg-name ${nameCls}">${esc(msg.name||'')}</span>
+          <span class="msg-rank ${rankCls}">${rankTxt}</span>
+          <span class="msg-time">${time}</span>
+        </div>
+        <div class="msg-bubble">${esc(msg.text||'')}</div>`;
+      container.appendChild(div);
+    });
+    container.scrollTop = container.scrollHeight;
+  });
+}
+
+// ===== SEND =====
+window.sendMessage = function() {
+  if (!currentUser || punished) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (containsBadWord(text)) {
+    input.value = '';
+    punished = true;
+    document.getElementById('chat-input-area').style.display = 'none';
+    document.getElementById('punishment-box').style.display = 'block';
+    document.getElementById('punishment-box').innerHTML = `
+      <p><strong>🚨 INAPPROPRIATE LANGUAGE DETECTED.</strong> Your chat access has been suspended.<br><br>
+      A report has been automatically sent to administration.<br><br>
+      To appeal, email <a href="mailto:126300@melissaisd.org" style="color:var(--cyan);">126300@melissaisd.org</a>.</p>`;
+    if (firebaseReady) chatRef.push({ type:'system', text:`🚨 ${currentUser.name} was blocked for inappropriate language.`, timestamp:Date.now() });
+    emailjs.send('service_g76iwik', 'template_fzeiumi', {
+      user_name: currentUser.name,
+      user_email: currentUser.email,
+      time: new Date().toLocaleString()
+    }).catch(err => console.log('Email error:', err));
+    return;
+  }
+
+  const now = Date.now();
+  spamLog = spamLog.filter(e => now - e.time < 20000 && e.text === text);
+  spamLog.push({ text, time: now });
+
+  if (spamLog.length >= 5) {
+    input.value = '';
+    if (!warnedOnce) {
+      warnedOnce = true; spamLog = [];
+      chatRef.push( { type:'system', text:`⚠ ${currentUser.name}: stop spamming.`, timestamp:Date.now() });
+      return;
+    } else {
+      punished = true; spamLog = [];
+      document.getElementById('chat-input-area').style.display = 'none';
+      document.getElementById('punishment-box').style.display = 'block';
+      chatRef.push( { type:'system', text:`🚨 ${currentUser.name} has been muted for spamming.`, timestamp:Date.now() });
+      return;
+    }
+  }
+
+  if (firebaseReady) {
+    chatRef.push({ email:currentUser.email, name:currentUser.name, rank:currentUser.rank, text, timestamp:Date.now() });
+  }
+  input.value = '';
+  document.getElementById('char-count').textContent = '300';
+  playBeep(600,'sine',.05,.03);
+};
+
+window.updateCharCount = function() {
+  const rem = 300 - document.getElementById('chat-input').value.length;
+  const el = document.getElementById('char-count');
+  el.textContent = rem;
+  el.style.color = rem < 30 ? 'var(--red-bright)' : '#555';
+};
+
+window.checkPunishment = function() {
+  const input = document.getElementById('punishment-input');
+  const val = input.value.trim();
+  const expected = Array.from({length:30},(_,i)=>String(i+1)).join(' ');
+  if (val === expected) {
+    punished = false; warnedOnce = false;
+    document.getElementById('punishment-box').style.display = 'none';
+    document.getElementById('chat-input-area').style.display = 'flex';
+    document.getElementById('punishment-feedback').textContent = '';
+    input.value = '';
+    chatRef.push( { type:'system', text:`${currentUser.name} has been unmuted.`, timestamp:Date.now() });
+  } else {
+    document.getElementById('punishment-feedback').textContent = 'incorrect. type: 1 2 3 ... all the way to 30, separated by spaces.';
+    document.getElementById('punishment-feedback').style.color = 'var(--red-bright)';
+    input.value = '';
+  }
+};
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ===== AUDIO =====
+function playBeep(freq=440,type='sine',dur=.15,vol=.04) {
+  try {
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type=type;osc.frequency.setValueAtTime(freq,ctx.currentTime);
+    gain.gain.setValueAtTime(vol,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    osc.start();osc.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function playAccessGranted(){playBeep(440);setTimeout(()=>playBeep(554),120);setTimeout(()=>playBeep(659),240);setTimeout(()=>playBeep(880,.1,.3),360);}
+window.playAccessGranted = playAccessGranted;
+
+// ===== CURSOR =====
+const cursor = document.getElementById('cursor');
+let trailColors = ['var(--cyan)','var(--red-bright)','#fff'];
+let tIdx = 0;
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+  const t = document.createElement('div');
+  t.className = 'trail';
+  t.style.cssText = `left:${e.clientX}px;top:${e.clientY}px;background:${trailColors[tIdx%3]};`;
+  document.body.appendChild(t);
+  tIdx++;
+  setTimeout(()=>t.remove(),500);
+});
+
+// ===== BOOT =====
+const BOOT = [
+  {t:'WEBS CHAT NODE — INITIALIZING...',c:'bl-w',d:80},
+  {t:'[ OK ] Firebase Auth: connected',c:'bl-g',d:280},
+  {t:'[ OK ] Google Sign-In: ready',c:'bl-g',d:480},
+  {t:'[ OK ] Member verification: active',c:'bl-g',d:680},
+  {t:'[ OK ] Security layer: online',c:'bl-c',d:880},
+  {t:'',c:'',d:1060},
+  {t:'CHAT NODE READY 💬',c:'bl-w',d:1160},
+];
+const bootEl = document.getElementById('boot-lines');
+BOOT.forEach(({t,c,d}) => {
+  setTimeout(() => {
+    const el = document.createElement('div');
+    el.className = `boot-line ${c}`;
+    el.textContent = t || '\u00A0';
+    bootEl.appendChild(el);
+  }, d);
+});
+setTimeout(() => {
+  const bo = document.getElementById('boot-overlay');
+  bo.classList.add('out');
+  setTimeout(() => bo.remove(), 900);
+  // Quiz disabled for now — go straight to sign-in
+  // Uncomment below to re-enable quiz:
+  // if (!sessionStorage.getItem('webs-quiz-passed')) {
+  //   document.getElementById('rules-modal').style.display = 'block';
+  // }
+}, 1800);
+
+// ===== PROTOCOLS =====
+const PROTOCOLS = [
+  ['01','HOSTILE BEHAVIOR DETECTED','Harassment, threats, bullying, discrimination, targeted attacks, intimidation, or repeated disruptive behavior toward users will trigger enforcement action.'],
+  ['02','LANGUAGE FILTRATION ACTIVE','Profanity, explicit content, NSFW material, offensive language, or inappropriate discussions are restricted within WEBS systems.'],
+  ['03','SPAM SUPPRESSION ENABLED','Repeated messages, emoji flooding, keyboard spam, mass tagging, chain messages, copy-paste floods, or disruption attempts may activate automatic moderation responses.'],
+  ['04','FALSE INFORMATION VIOLATION','Faking ranks, tags, permissions, announcements, completions, insider information, leaks, or administrative authority is classified as system manipulation.'],
+  ['05','SECURITY PROTOCOL ENFORCEMENT','Distribution of malicious links, harmful files, bypass methods, exploits, or attempts to interfere with WEBS infrastructure is strictly prohibited.'],
+  ['06','IMPERSONATION ALERT','Impersonating administrators, moderators, members, organizations, or system entities is considered unauthorized identity replication.'],
+  ['07','CHANNEL MISUSE DETECTED','Off-topic flooding, misuse of channels, or intentional disruption of organized communication systems may result in restriction.'],
+  ['08','UNAUTHORIZED TRANSACTION BLOCK','Trading, selling, transferring, or exchanging accounts, permissions, tags, or restricted access is prohibited.'],
+  ['09','INFORMATION LEAK PREVENTION','Screenshots, recordings, copied documents, confidential files, or internal WEBS discussions may not be distributed outside authorized environments.'],
+  ['10','RAID PREVENTION SYSTEM','Coordinated spam attacks, mass pinging, organized disruption, or destabilization attempts against WEBS systems are prohibited.'],
+  ['11','WATCH LIST SURVEILLANCE','Suspicious behavior, repeated violations, or disruptive activity may place users under elevated monitoring status.'],
+  ['12','ADMINISTRATIVE AUTHORITY PRIORITY','Failure to comply with moderator or administrator instructions may result in immediate enforcement action.'],
+  ['13','SAFE ENVIRONMENT DIRECTIVE','Dangerous behavior, harmful content, reckless activity, or actions intended to create unsafe conditions are prohibited.'],
+  ['14','EXPLOIT DISCLOSURE POLICY','Security vulnerabilities, loopholes, or system exploits must be reported privately to administration. Public distribution is forbidden.'],
+  ['15','ACCESS VIOLATION DETECTED','Attempts to bypass permissions, interfere with restricted systems, modify protected areas, or access unauthorized controls are prohibited.'],
+  ['16','ALTERNATE ACCOUNT IDENTIFICATION','Use of alternate accounts to evade punishment, manipulate systems, or bypass restrictions may trigger permanent restrictions.'],
+  ['17','UNAUTHORIZED ADVERTISING BLOCK','Promotion of unrelated communities, websites, products, servers, or external platforms without approval is prohibited.'],
+  ['18','MEDIA SCANNING ACTIVE','Images, videos, audio clips, files, or uploads containing offensive, dangerous, explicit, or disruptive material may be removed without notice.'],
+  ['19','FALSE ALERT RESTRICTION','Fake leaks, false warnings, fabricated shutdown notices, panic-spreading messages, or misinformation campaigns are prohibited.'],
+  ['20','PRIVACY PROTECTION ENFORCEMENT','Sharing personal information, passwords, addresses, phone numbers, private conversations, or confidential user data is strictly forbidden.'],
+  ['21','SYSTEM IDENTIFICATION ABUSE','Misuse of tags, fake support campaigns, manipulated affiliations, or abuse of WEBS identification systems may result in privilege removal.'],
+  ['22','ACTIVITY LOGGING ENABLED','User actions, uploads, edits, communication history, and moderation records may be archived for security and enforcement purposes.'],
+  ['23','DISRUPTION CLAUSE','Any action determined to intentionally create chaos, instability, panic, drama, or damage within WEBS systems may be classified as hostile behavior.'],
+];
+
+const protoEl = document.getElementById('protocols-list');
+PROTOCOLS.forEach(([num,title,desc]) => {
+  const d = document.createElement('div');
+  d.className = 'protocol-card';
+  d.innerHTML = `<div class="protocol-num">[${num}]</div><div class="protocol-title">${title}</div><div class="protocol-desc">${desc}</div>`;
+  d.addEventListener('mouseenter', () => playBeep(400,'sine',.04,.02));
+  protoEl.appendChild(d);
+});
+
+// ===== QUIZ =====
+const QUESTIONS = [
+  {q:'[01] What may happen if a user shares screenshots or confidential WEBS information outside the system?',opts:['Nothing','They receive bonus permissions','Enforcement action may occur','Their rank increases'],answer:2},
+  {q:'[02] Which of the following is considered a violation of WEBS protocols?',opts:['Using the correct channel','Reporting bugs privately','Faking admin authority or ranks','Following moderator instructions'],answer:2},
+  {q:'[03] What does the Spam Suppression system target?',opts:['Helpful announcements','Repeated spam, emoji floods, and mass tagging','Challenge completions','User suggestions'],answer:1},
+  {q:'[04] What should users do if they discover a system exploit or vulnerability?',opts:['Post it publicly in chat','Share it with friends','Report it privately to administration','Ignore it completely'],answer:2},
+  {q:'[05] Which punishment is listed as a possible enforcement action for violating WEBS protocols?',opts:['Unlimited permissions','Rank upgrades','Permanent removal from WEBS systems','Free admin access'],answer:2},
+];
+const quizEl = document.getElementById('quiz-questions');
+QUESTIONS.forEach((q,qi) => {
+  const div = document.createElement('div');
+  div.className = 'q-card';
+  div.innerHTML = `<div class="q-text">${q.q}</div>` +
+    q.opts.map((opt,oi) => `<label class="q-opt"><input type="radio" name="q${qi}" value="${oi}"><span>${['A','B','C','D'][oi]}. ${opt}</span></label>`).join('');
+  quizEl.appendChild(div);
+});
+
+window.showQuiz = function() {
+  document.getElementById('rules-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  document.getElementById('rules-modal').scrollTop = 0;
+  playBeep(523,'sine',.15);
+};
+
+window.submitQuiz = function() {
+  let correct=0, allAnswered=true;
+  QUESTIONS.forEach((q,qi) => {
+    const sel = document.querySelector(`input[name="q${qi}"]:checked`);
+    if (!sel) { allAnswered=false; return; }
+    if (parseInt(sel.value)===q.answer) correct++;
+  });
+  if (!allAnswered) {
+    document.getElementById('quiz-result').innerHTML = '<span style="color:var(--yellow);">⚠ Answer all 5 questions first.</span>';
+    return;
+  }
+  const res = document.getElementById('quiz-result');
+  if (correct/QUESTIONS.length >= .8) {
+    playAccessGranted();
+    res.innerHTML = `<span style="color:var(--green);">✓ SCORE: ${correct}/5 — ACCESS GRANTED.</span>`;
+    sessionStorage.setItem('webs-quiz-passed','1');
+    setTimeout(() => {
+      document.getElementById('rules-modal').style.display = 'none';
+      document.getElementById('signin-screen').classList.add('active');
+    }, 1200);
+  } else {
+    playBeep(150,'square',.4);
+    res.innerHTML = `<div style="color:var(--red-bright);margin-bottom:8px;">SCORE: ${correct}/5 — sorry my guy i cant trust you.</div><div style="font-size:12px;color:#ddd;">Score 80%+ to enter. Email <a href="mailto:126300@melissaisd.org" style="color:var(--cyan);">126300@melissaisd.org</a> for access.</div>`;
+  }
+};
+</script>
+</body>
+</html>
