@@ -215,49 +215,78 @@ header{background:rgba(3,3,3,.97);border-bottom:1px solid var(--green);padding:1
 <!-- SIGN IN -->
 <div id="signin-screen">
   <div class="signin-box">
+    <!-- Icon -->
+    <div id="auth-icon" style="font-size:32px;margin-bottom:16px;">🔐</div>
     <div class="signin-title" id="auth-title">SIGN IN</div>
-    <div class="signin-sub" id="auth-sub">Use your Melissa ISD school email.<br>Only verified WEBS members can enter.</div>
-    <input type="email" id="auth-email" placeholder="your@melissaisd.org" autocomplete="off"
-      style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:1px;"
+    <div class="signin-sub" id="auth-sub">Enter your Melissa ISD school email and password to access the WEBS Chat Node.</div>
+
+    <!-- Inputs -->
+    <div style="text-align:left;margin-bottom:6px;font-size:10px;color:#555;letter-spacing:2px;text-transform:uppercase;">School Email</div>
+    <input type="email" id="auth-email" placeholder="126300@melissaisd.org" autocomplete="off"
+      style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-bottom-color:#444;color:#fff;padding:13px 14px;font-family:'Source Code Pro',monospace;font-size:14px;outline:none;margin-bottom:16px;letter-spacing:1px;transition:border .2s;"
+      onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='#444'"
+      onkeydown="if(event.key==='Enter')document.getElementById('auth-password').focus()">
+
+    <div style="text-align:left;margin-bottom:6px;font-size:10px;color:#555;letter-spacing:2px;text-transform:uppercase;">Password</div>
+    <input type="password" id="auth-password" placeholder="••••••••" autocomplete="off"
+      style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-bottom-color:#444;color:#fff;padding:13px 14px;font-family:'Source Code Pro',monospace;font-size:14px;outline:none;margin-bottom:16px;letter-spacing:3px;transition:border .2s;"
+      onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='#444'"
       onkeydown="if(event.key==='Enter')handleAuth()">
-    <input type="password" id="auth-password" placeholder="password" autocomplete="off"
-      style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;"
-      onkeydown="if(event.key==='Enter')handleAuth()">
-    <input type="password" id="auth-confirm" placeholder="confirm password" autocomplete="off"
-      style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;display:none;"
-      onkeydown="if(event.key==='Enter')handleAuth()">
-    <button id="auth-btn" onclick="handleAuth()"
-      style="width:100%;background:transparent;border:1px solid var(--green);color:var(--green);padding:12px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-bottom:10px;"
-      onmouseover="this.style.background='var(--green)';this.style.color='#000'"
-      onmouseout="this.style.background='transparent';this.style.color='var(--green)'">SIGN IN ›</button>
-    <div id="signin-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:18px;margin-bottom:10px;"></div>
-    <div style="font-size:12px;color:#555;letter-spacing:1px;margin-bottom:20px;">
-      <span id="auth-toggle-link" onclick="toggleAuthMode()" style="cursor:pointer;color:var(--cyan);">No account? CREATE ONE</span>
+
+    <div id="auth-confirm-wrap" style="display:none;">
+      <div style="text-align:left;margin-bottom:6px;font-size:10px;color:#555;letter-spacing:2px;text-transform:uppercase;">Confirm Password</div>
+      <input type="password" id="auth-confirm" placeholder="••••••••" autocomplete="off"
+        style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-bottom-color:#444;color:#fff;padding:13px 14px;font-family:'Source Code Pro',monospace;font-size:14px;outline:none;margin-bottom:16px;letter-spacing:3px;transition:border .2s;"
+        onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='#444'"
+        onkeydown="if(event.key==='Enter')handleAuth()">
     </div>
-    <div style="margin:0 0 12px;font-size:12px;color:#333;letter-spacing:2px;">— or use admin override —</div>
-    <input type="password" id="chat-override-input" placeholder="admin override code" style="width:100%;background:#000;border:1px solid #222;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;text-align:center;" autocomplete="off" onkeydown="if(event.key==='Enter')checkChatOverride()">
-    <button onclick="checkChatOverride()" style="width:100%;background:#000;border:1px solid #333;color:#555;padding:11px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;" onmouseover="this.style.borderColor='var(--yellow)';this.style.color='var(--yellow)'" onmouseout="this.style.borderColor='#333';this.style.color='#555'">USE OVERRIDE</button>
-    <div id="override-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:16px;margin-top:8px;"></div>
+
+    <button id="auth-btn" onclick="handleAuth()"
+      style="width:100%;background:var(--green);border:none;color:#000;padding:14px;font-family:'Source Code Pro',monospace;font-size:13px;font-weight:700;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-bottom:14px;"
+      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">SIGN IN ›</button>
+
+    <div id="signin-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:18px;margin-bottom:14px;text-align:center;"></div>
+
+    <div style="border-top:1px solid #111;padding-top:14px;font-size:12px;color:#444;letter-spacing:1px;">
+      <span id="auth-toggle-link" onclick="toggleAuthMode()" style="cursor:pointer;color:var(--cyan);text-decoration:underline;text-underline-offset:3px;">No account yet? Create one here</span>
+    </div>
+
+    <!-- Override (collapsed by default) -->
+    <div style="margin-top:20px;border-top:1px solid #111;padding-top:16px;">
+      <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'" style="font-size:10px;color:#333;letter-spacing:2px;cursor:pointer;text-transform:uppercase;margin-bottom:10px;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#333'">▸ Admin Override</div>
+      <div style="display:none;">
+        <input type="password" id="chat-override-input" placeholder="override code" style="width:100%;background:#000;border:1px solid #1a1a1a;color:#fff;padding:11px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:8px;letter-spacing:2px;text-align:center;" autocomplete="off" onkeydown="if(event.key==='Enter')checkChatOverride()">
+        <button onclick="checkChatOverride()" style="width:100%;background:#000;border:1px solid #333;color:#555;padding:10px;font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;" onmouseover="this.style.color='var(--yellow)';this.style.borderColor='var(--yellow)'" onmouseout="this.style.color='#555';this.style.borderColor='#333'">USE OVERRIDE</button>
+        <div id="override-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:16px;margin-top:8px;"></div>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- OTP VERIFICATION SCREEN -->
 <div id="otp-screen">
-  <div class="signin-box">
-    <div class="signin-title" style="color:var(--cyan);">VERIFY EMAIL</div>
-    <div class="signin-sub">A 6-digit code was sent to:<br><span id="otp-email-display" style="color:var(--cyan);font-size:13px;"></span><br><br>Check your school email inbox.</div>
-    <input type="text" id="otp-input" placeholder="000000" maxlength="6" autocomplete="off"
-      style="width:100%;background:#000;border:1px solid var(--cyan);color:var(--cyan);padding:14px;font-family:'Source Code Pro',monospace;font-size:22px;outline:none;margin-bottom:10px;letter-spacing:8px;text-align:center;"
-      onkeydown="if(event.key==='Enter')verifyOTP()">
+  <div class="signin-box" style="border-color:var(--cyan);box-shadow:var(--glow-c);">
+    <div style="font-size:40px;margin-bottom:16px;">📨</div>
+    <div class="signin-title" style="color:var(--cyan);text-shadow:var(--glow-c);">CHECK YOUR EMAIL</div>
+    <div class="signin-sub">We sent a 6-digit verification code to:</div>
+    <div style="color:var(--cyan);font-size:14px;letter-spacing:1px;margin-bottom:8px;word-break:break-all;" id="otp-email-display"></div>
+    <div style="font-size:11px;color:#555;letter-spacing:1px;margin-bottom:28px;">Open your school email and enter the code below. It expires in 10 minutes.</div>
+
+    <div style="text-align:left;margin-bottom:6px;font-size:10px;color:#555;letter-spacing:2px;text-transform:uppercase;">Verification Code</div>
+    <input type="text" id="otp-input" placeholder="0 0 0 0 0 0" maxlength="6" autocomplete="off"
+      style="width:100%;background:#0a0a0a;border:1px solid var(--cyan);color:var(--cyan);padding:16px;font-family:'Source Code Pro',monospace;font-size:28px;outline:none;margin-bottom:14px;letter-spacing:10px;text-align:center;"
+      onkeydown="if(event.key==='Enter')verifyOTP()" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+
     <button onclick="verifyOTP()"
-      style="width:100%;background:transparent;border:1px solid var(--cyan);color:var(--cyan);padding:12px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-bottom:10px;"
-      onmouseover="this.style.background='var(--cyan)';this.style.color='#000'"
-      onmouseout="this.style.background='transparent';this.style.color='var(--cyan)'">VERIFY ›</button>
-    <div id="otp-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:18px;margin-bottom:10px;"></div>
-    <div style="font-size:12px;color:#555;letter-spacing:1px;">
-      <span onclick="resendOTP()" style="cursor:pointer;color:#555;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='#555'">Didn't get it? Resend code</span>
-      &nbsp;·&nbsp;
-      <span onclick="signOutUser()" style="cursor:pointer;color:#555;" onmouseover="this.style.color='var(--red-bright)'" onmouseout="this.style.color='#555'">Cancel</span>
+      style="width:100%;background:var(--cyan);border:none;color:#000;padding:14px;font-family:'Source Code Pro',monospace;font-size:13px;font-weight:700;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-bottom:12px;"
+      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">VERIFY CODE ›</button>
+
+    <div id="otp-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:18px;margin-bottom:14px;text-align:center;"></div>
+
+    <div style="border-top:1px solid #111;padding-top:14px;font-size:12px;color:#444;display:flex;justify-content:center;gap:20px;">
+      <span onclick="resendOTP()" style="cursor:pointer;color:#555;text-decoration:underline;text-underline-offset:3px;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='#555'">Resend code</span>
+      <span style="color:#222;">|</span>
+      <span onclick="signOutUser()" style="cursor:pointer;color:#555;text-decoration:underline;text-underline-offset:3px;" onmouseover="this.style.color='var(--red-bright)'" onmouseout="this.style.color='#555'">Cancel & go back</span>
     </div>
   </div>
 </div>
@@ -442,13 +471,15 @@ let authMode = 'signin';
 window.toggleAuthMode = function() {
   authMode = authMode === 'signin' ? 'create' : 'signin';
   const isCreate = authMode === 'create';
+  document.getElementById('auth-icon').textContent = isCreate ? '✉️' : '🔐';
   document.getElementById('auth-title').textContent = isCreate ? 'CREATE ACCOUNT' : 'SIGN IN';
-  document.getElementById('auth-sub').innerHTML = isCreate
-    ? 'Enter your Melissa ISD school email.<br>A verification code will be sent to it.'
-    : 'Use your Melissa ISD school email.<br>Only verified WEBS members can enter.';
-  document.getElementById('auth-confirm').style.display = isCreate ? 'block' : 'none';
+  document.getElementById('auth-sub').textContent = isCreate
+    ? 'Pick a password for your new account. A verification code will be emailed to you.'
+    : 'Enter your Melissa ISD school email and password to access the WEBS Chat Node.';
+  document.getElementById('auth-confirm-wrap').style.display = isCreate ? 'block' : 'none';
   document.getElementById('auth-btn').textContent = isCreate ? 'CREATE ACCOUNT ›' : 'SIGN IN ›';
-  document.getElementById('auth-toggle-link').textContent = isCreate ? 'Already have an account? SIGN IN' : 'No account? CREATE ONE';
+  document.getElementById('auth-btn').style.background = isCreate ? 'var(--cyan)' : 'var(--green)';
+  document.getElementById('auth-toggle-link').textContent = isCreate ? 'Already have an account? Sign in here' : 'No account yet? Create one here';
   document.getElementById('signin-error').textContent = '';
 };
 
@@ -520,7 +551,7 @@ async function sendOTP(user, email) {
   }
 
   try {
-    await emailjs.send('service_g76iwik', 'template_otp', {
+    await emailjs.send('service_g76iwik', 'template_1fuxsfr', {
       to_email: email,
       otp: code
     });
