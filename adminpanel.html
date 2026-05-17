@@ -228,48 +228,74 @@ header{position:sticky;top:0;z-index:100;background:rgba(3,3,3,0.97);border-bott
 <!-- EMAIL SIGN-IN OVERLAY FOR CHAT -->
 <div id="chat-signin-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:5000;align-items:center;justify-content:center;">
   <div style="background:#050505;border:1px solid var(--green);padding:44px;width:min(460px,92vw);text-align:center;box-shadow:var(--glow-g);animation:modalIn .3s ease;">
-    <div style="font-family:'Rubik Glitch',cursive;font-size:22px;color:var(--green);letter-spacing:3px;margin-bottom:8px;" id="chat-auth-title">SENTINEL CHAT</div>
-    <div style="font-size:13px;color:#ddd;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;line-height:1.8;" id="chat-auth-sub">Sign in with your school email<br>to verify your SENTINEL rank</div>
-    <input type="email" id="chat-auth-email" placeholder="your@melissaisd.org" autocomplete="off"
-      style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:1px;"
+    <div style="font-size:30px;margin-bottom:12px;" id="chat-auth-icon">🔐</div>
+    <div style="font-family:'Rubik Glitch',cursive;font-size:22px;color:var(--green);letter-spacing:3px;margin-bottom:6px;" id="chat-auth-title">SENTINEL CHAT</div>
+    <div style="font-size:12px;color:#888;letter-spacing:1px;margin-bottom:24px;line-height:1.7;" id="chat-auth-sub">Sign in with your school email to verify your SENTINEL rank.</div>
+
+    <div style="text-align:left;margin-bottom:5px;font-size:10px;color:#555;letter-spacing:2px;">SCHOOL EMAIL</div>
+    <input type="email" id="chat-auth-email" placeholder="126300@melissaisd.org" autocomplete="off"
+      style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-bottom-color:#444;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:14px;letter-spacing:1px;transition:border .2s;"
+      onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='#444'"
+      onkeydown="if(event.key==='Enter')document.getElementById('chat-auth-password').focus()">
+
+    <div style="text-align:left;margin-bottom:5px;font-size:10px;color:#555;letter-spacing:2px;">PASSWORD</div>
+    <input type="password" id="chat-auth-password" placeholder="••••••••" autocomplete="off"
+      style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-bottom-color:#444;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:14px;outline:none;margin-bottom:14px;letter-spacing:3px;transition:border .2s;"
+      onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='#444'"
       onkeydown="if(event.key==='Enter')handleChatAuth()">
-    <input type="password" id="chat-auth-password" placeholder="password" autocomplete="off"
-      style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;"
-      onkeydown="if(event.key==='Enter')handleChatAuth()">
-    <input type="password" id="chat-auth-confirm" placeholder="confirm password" autocomplete="off"
-      style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;display:none;"
-      onkeydown="if(event.key==='Enter')handleChatAuth()">
-    <button id="chat-auth-btn" onclick="handleChatAuth()"
-      style="width:100%;background:transparent;border:1px solid var(--green);color:var(--green);padding:12px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-bottom:10px;"
-      onmouseover="this.style.background='var(--green)';this.style.color='#000'"
-      onmouseout="this.style.background='transparent';this.style.color='var(--green)'">SIGN IN ›</button>
-    <div id="chat-signin-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:18px;margin-bottom:10px;"></div>
-    <div style="font-size:12px;color:#444;margin-bottom:16px;">
-      <span id="chat-auth-toggle" onclick="toggleChatAuthMode()" style="cursor:pointer;color:#666;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='#666'">No account? CREATE ONE</span>
+
+    <div id="chat-auth-confirm-wrap" style="display:none;">
+      <div style="text-align:left;margin-bottom:5px;font-size:10px;color:#555;letter-spacing:2px;">CONFIRM PASSWORD</div>
+      <input type="password" id="chat-auth-confirm" placeholder="••••••••" autocomplete="off"
+        style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-bottom-color:#444;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:14px;outline:none;margin-bottom:14px;letter-spacing:3px;transition:border .2s;"
+        onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='#444'"
+        onkeydown="if(event.key==='Enter')handleChatAuth()">
     </div>
-    <div style="font-size:12px;color:#333;margin-bottom:10px;letter-spacing:2px;">— or use override code —</div>
-    <input type="password" id="override-input" placeholder="override code" style="width:100%;background:#000;border:1px solid #222;color:#fff;padding:11px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;text-align:center;" autocomplete="off" onkeydown="if(event.key==='Enter')checkOverride()">
-    <button onclick="checkOverride()" style="width:100%;background:#000;border:1px solid #333;color:#555;padding:11px;font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;margin-bottom:12px;transition:all .2s;" onmouseover="this.style.borderColor='var(--yellow)';this.style.color='var(--yellow)'" onmouseout="this.style.borderColor='#333';this.style.color='#555'">USE OVERRIDE</button>
-    <button onclick="document.getElementById('chat-signin-overlay').style.display='none'" style="background:transparent;border:none;color:#444;font-size:11px;letter-spacing:2px;cursor:pointer;font-family:'Source Code Pro',monospace;text-transform:uppercase;">CANCEL</button>
+
+    <button id="chat-auth-btn" onclick="handleChatAuth()"
+      style="width:100%;background:var(--green);border:none;color:#000;padding:13px;font-family:'Source Code Pro',monospace;font-size:13px;font-weight:700;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-bottom:12px;"
+      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">SIGN IN ›</button>
+
+    <div id="chat-signin-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:18px;margin-bottom:12px;"></div>
+
+    <div style="border-top:1px solid #111;padding-top:12px;font-size:12px;margin-bottom:16px;">
+      <span id="chat-auth-toggle" onclick="toggleChatAuthMode()" style="cursor:pointer;color:var(--cyan);text-decoration:underline;text-underline-offset:3px;">No account yet? Create one here</span>
+    </div>
+
+    <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'" style="font-size:10px;color:#333;letter-spacing:2px;cursor:pointer;text-transform:uppercase;margin-bottom:8px;" onmouseover="this.style.color='#555'" onmouseout="this.style.color='#333'">▸ Override Code</div>
+    <div style="display:none;">
+      <input type="password" id="override-input" placeholder="override code" style="width:100%;background:#000;border:1px solid #1a1a1a;color:#fff;padding:10px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:8px;letter-spacing:2px;text-align:center;" autocomplete="off" onkeydown="if(event.key==='Enter')checkOverride()">
+      <button onclick="checkOverride()" style="width:100%;background:#000;border:1px solid #2a2a2a;color:#444;padding:10px;font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;margin-bottom:8px;transition:all .2s;" onmouseover="this.style.color='var(--yellow)';this.style.borderColor='var(--yellow)'" onmouseout="this.style.color='#444';this.style.borderColor='#2a2a2a'">USE OVERRIDE</button>
+    </div>
+    <button onclick="document.getElementById('chat-signin-overlay').style.display='none'" style="background:transparent;border:none;color:#333;font-size:11px;letter-spacing:2px;cursor:pointer;font-family:'Source Code Pro',monospace;text-transform:uppercase;margin-top:4px;" onmouseover="this.style.color='#777'" onmouseout="this.style.color='#333'">✕ Cancel</button>
   </div>
 </div>
 
 <!-- OTP OVERLAY FOR EDITORS CHAT -->
 <div id="chat-otp-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:5002;align-items:center;justify-content:center;">
   <div style="background:#050505;border:1px solid var(--cyan);padding:44px;width:min(440px,92vw);text-align:center;box-shadow:var(--glow-c);animation:modalIn .3s ease;">
-    <div style="font-family:'Rubik Glitch',cursive;font-size:22px;color:var(--cyan);letter-spacing:3px;margin-bottom:8px;">VERIFY EMAIL</div>
-    <div style="font-size:13px;color:#ddd;letter-spacing:1px;margin-bottom:24px;line-height:1.8;">A 6-digit code was sent to:<br><span id="chat-otp-email-display" style="color:var(--cyan);"></span><br><br>Check your school email inbox.</div>
-    <input type="text" id="chat-otp-input" placeholder="000000" maxlength="6" autocomplete="off"
-      style="width:100%;background:#000;border:1px solid var(--cyan);color:var(--cyan);padding:14px;font-family:'Source Code Pro',monospace;font-size:22px;outline:none;margin-bottom:10px;letter-spacing:8px;text-align:center;"
-      onkeydown="if(event.key==='Enter')verifyChatOTP()">
+    <div style="font-size:36px;margin-bottom:14px;">📨</div>
+    <div style="font-family:'Rubik Glitch',cursive;font-size:20px;color:var(--cyan);letter-spacing:3px;margin-bottom:6px;">CHECK YOUR EMAIL</div>
+    <div style="font-size:12px;color:#888;letter-spacing:1px;margin-bottom:6px;line-height:1.7;">We sent a 6-digit code to:</div>
+    <div style="color:var(--cyan);font-size:13px;margin-bottom:6px;word-break:break-all;" id="chat-otp-email-display"></div>
+    <div style="font-size:11px;color:#444;letter-spacing:1px;margin-bottom:24px;">Open your school email and enter the code. Expires in 10 minutes.</div>
+
+    <div style="text-align:left;margin-bottom:5px;font-size:10px;color:#555;letter-spacing:2px;">VERIFICATION CODE</div>
+    <input type="text" id="chat-otp-input" placeholder="0 0 0 0 0 0" maxlength="6" autocomplete="off"
+      style="width:100%;background:#0a0a0a;border:1px solid var(--cyan);color:var(--cyan);padding:16px;font-family:'Source Code Pro',monospace;font-size:26px;outline:none;margin-bottom:12px;letter-spacing:10px;text-align:center;"
+      onkeydown="if(event.key==='Enter')verifyChatOTP()" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+
     <button onclick="verifyChatOTP()"
-      style="width:100%;background:transparent;border:1px solid var(--cyan);color:var(--cyan);padding:12px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-bottom:10px;"
-      onmouseover="this.style.background='var(--cyan)';this.style.color='#000'"
-      onmouseout="this.style.background='transparent';this.style.color='var(--cyan)'">VERIFY ›</button>
-    <div id="chat-otp-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:18px;margin-bottom:10px;"></div>
-    <span onclick="resendChatOTP()" style="cursor:pointer;font-size:12px;color:#444;font-family:'Source Code Pro',monospace;letter-spacing:1px;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='#444'">Resend code</span>
-    &nbsp;·&nbsp;
-    <span onclick="document.getElementById('chat-otp-overlay').style.display='none';document.getElementById('chat-signin-overlay').style.display='flex';" style="cursor:pointer;font-size:12px;color:#444;font-family:'Source Code Pro',monospace;letter-spacing:1px;" onmouseover="this.style.color='var(--red-bright)'" onmouseout="this.style.color='#444'">Cancel</span>
+      style="width:100%;background:var(--cyan);border:none;color:#000;padding:13px;font-family:'Source Code Pro',monospace;font-size:13px;font-weight:700;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-bottom:12px;"
+      onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">VERIFY CODE ›</button>
+
+    <div id="chat-otp-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:18px;margin-bottom:12px;"></div>
+
+    <div style="border-top:1px solid #111;padding-top:12px;font-size:12px;display:flex;justify-content:center;gap:16px;">
+      <span onclick="resendChatOTP()" style="cursor:pointer;color:#555;text-decoration:underline;text-underline-offset:3px;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='#555'">Resend code</span>
+      <span style="color:#222;">|</span>
+      <span onclick="document.getElementById('chat-otp-overlay').style.display='none';document.getElementById('chat-signin-overlay').style.display='flex';" style="cursor:pointer;color:#555;text-decoration:underline;text-underline-offset:3px;" onmouseover="this.style.color='var(--red-bright)'" onmouseout="this.style.color='#555'">Cancel</span>
+    </div>
   </div>
 </div>
 
@@ -969,13 +995,15 @@ setTimeout(()=>{
     window.toggleChatAuthMode = function() {
       chatAuthMode = chatAuthMode === 'signin' ? 'create' : 'signin';
       const isCreate = chatAuthMode === 'create';
+      document.getElementById('chat-auth-icon').textContent = isCreate ? '✉️' : '🔐';
       document.getElementById('chat-auth-title').textContent = isCreate ? 'CREATE ACCOUNT' : 'SENTINEL CHAT';
-      document.getElementById('chat-auth-sub').innerHTML = isCreate
-        ? 'Enter your @melissaisd.org email.<br>A verification code will be sent.'
-        : 'Sign in with your school email<br>to verify your SENTINEL rank';
-      document.getElementById('chat-auth-confirm').style.display = isCreate ? 'block' : 'none';
+      document.getElementById('chat-auth-sub').textContent = isCreate
+        ? 'Pick a password for your new account. A verification code will be emailed to you.'
+        : 'Sign in with your school email to verify your SENTINEL rank.';
+      document.getElementById('chat-auth-confirm-wrap').style.display = isCreate ? 'block' : 'none';
       document.getElementById('chat-auth-btn').textContent = isCreate ? 'CREATE ACCOUNT ›' : 'SIGN IN ›';
-      document.getElementById('chat-auth-toggle').textContent = isCreate ? 'Already have an account? SIGN IN' : 'No account? CREATE ONE';
+      document.getElementById('chat-auth-btn').style.background = isCreate ? 'var(--cyan)' : 'var(--green)';
+      document.getElementById('chat-auth-toggle').textContent = isCreate ? 'Already have an account? Sign in here' : 'No account yet? Create one here';
       document.getElementById('chat-signin-error').textContent = '';
     };
 
@@ -1033,7 +1061,7 @@ setTimeout(()=>{
       chatOTPEmail = email;
       try { await db.ref('otp-verify/' + user.uid).set({ code, expiry }); } catch(e) {}
       try {
-        await emailjs.send('service_g76iwik', 'template_otp', { to_email: email, otp: code });
+        await emailjs.send('service_g76iwik', 'template_1fuxsfr', { to_email: email, otp: code });
       } catch(e) { console.log('OTP email error:', e); }
       document.getElementById('chat-signin-overlay').style.display = 'none';
       document.getElementById('chat-otp-email-display').textContent = email;
