@@ -96,8 +96,8 @@ header{background:rgba(3,3,3,.97);border-bottom:1px solid var(--green);padding:1
 #quiz-result{margin-top:20px;text-align:center;font-size:14px;letter-spacing:2px;min-height:24px;line-height:1.8;}
 
 /* SIGN IN SCREEN */
-#signin-screen{flex:1;display:none;align-items:center;justify-content:center;padding:32px;}
-#signin-screen.active{display:flex;}
+#signin-screen,#otp-screen{flex:1;display:none;align-items:center;justify-content:center;padding:32px;}
+#signin-screen.active,#otp-screen.active{display:flex;}
 .signin-box{background:#050505;border:1px solid var(--green);padding:50px 44px;width:min(480px,95vw);box-shadow:var(--glow-g);animation:boxIn .4s ease;text-align:center;}
 @keyframes boxIn{from{transform:scale(.95) translateY(10px);opacity:0;}to{transform:none;opacity:1;}}
 .signin-title{font-family:'Rubik Glitch',cursive;font-size:26px;color:var(--green);margin-bottom:8px;letter-spacing:3px;text-shadow:var(--glow-g);}
@@ -215,18 +215,50 @@ header{background:rgba(3,3,3,.97);border-bottom:1px solid var(--green);padding:1
 <!-- SIGN IN -->
 <div id="signin-screen">
   <div class="signin-box">
-    <div class="signin-title">SIGN IN</div>
-    <div class="signin-sub">Use your Melissa ISD school account.<br>Only verified WEBS members can enter.</div>
-    <button class="google-btn" onclick="signInWithGoogle()">
-      <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
-      SIGN IN WITH GOOGLE
-    </button>
-    <div id="signin-error"></div>
-    <div style="margin:20px 0 12px;font-size:12px;color:#555;letter-spacing:2px;">— or use admin override —</div>
-    <input type="password" id="chat-override-input" placeholder="admin override code" style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;text-align:center;" autocomplete="off" onkeydown="if(event.key==='Enter')checkChatOverride()">
-    <button onclick="checkChatOverride()" style="width:100%;background:#000;border:1px solid #555;color:#ddd;padding:11px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;" onmouseover="this.style.borderColor='var(--yellow)';this.style.color='var(--yellow)'" onmouseout="this.style.borderColor='#555';this.style.color='#ddd'">USE OVERRIDE</button>
+    <div class="signin-title" id="auth-title">SIGN IN</div>
+    <div class="signin-sub" id="auth-sub">Use your Melissa ISD school email.<br>Only verified WEBS members can enter.</div>
+    <input type="email" id="auth-email" placeholder="your@melissaisd.org" autocomplete="off"
+      style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:1px;"
+      onkeydown="if(event.key==='Enter')handleAuth()">
+    <input type="password" id="auth-password" placeholder="password" autocomplete="off"
+      style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;"
+      onkeydown="if(event.key==='Enter')handleAuth()">
+    <input type="password" id="auth-confirm" placeholder="confirm password" autocomplete="off"
+      style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;display:none;"
+      onkeydown="if(event.key==='Enter')handleAuth()">
+    <button id="auth-btn" onclick="handleAuth()"
+      style="width:100%;background:transparent;border:1px solid var(--green);color:var(--green);padding:12px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-bottom:10px;"
+      onmouseover="this.style.background='var(--green)';this.style.color='#000'"
+      onmouseout="this.style.background='transparent';this.style.color='var(--green)'">SIGN IN ›</button>
+    <div id="signin-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:18px;margin-bottom:10px;"></div>
+    <div style="font-size:12px;color:#555;letter-spacing:1px;margin-bottom:20px;">
+      <span id="auth-toggle-link" onclick="toggleAuthMode()" style="cursor:pointer;color:var(--cyan);">No account? CREATE ONE</span>
+    </div>
+    <div style="margin:0 0 12px;font-size:12px;color:#333;letter-spacing:2px;">— or use admin override —</div>
+    <input type="password" id="chat-override-input" placeholder="admin override code" style="width:100%;background:#000;border:1px solid #222;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;text-align:center;" autocomplete="off" onkeydown="if(event.key==='Enter')checkChatOverride()">
+    <button onclick="checkChatOverride()" style="width:100%;background:#000;border:1px solid #333;color:#555;padding:11px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;" onmouseover="this.style.borderColor='var(--yellow)';this.style.color='var(--yellow)'" onmouseout="this.style.borderColor='#333';this.style.color='#555'">USE OVERRIDE</button>
     <div id="override-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:16px;margin-top:8px;"></div>
-    <div class="signin-note">Only @melissaisd.org accounts are accepted.<br>Override is for admins only.</div>
+  </div>
+</div>
+
+<!-- OTP VERIFICATION SCREEN -->
+<div id="otp-screen">
+  <div class="signin-box">
+    <div class="signin-title" style="color:var(--cyan);">VERIFY EMAIL</div>
+    <div class="signin-sub">A 6-digit code was sent to:<br><span id="otp-email-display" style="color:var(--cyan);font-size:13px;"></span><br><br>Check your school email inbox.</div>
+    <input type="text" id="otp-input" placeholder="000000" maxlength="6" autocomplete="off"
+      style="width:100%;background:#000;border:1px solid var(--cyan);color:var(--cyan);padding:14px;font-family:'Source Code Pro',monospace;font-size:22px;outline:none;margin-bottom:10px;letter-spacing:8px;text-align:center;"
+      onkeydown="if(event.key==='Enter')verifyOTP()">
+    <button onclick="verifyOTP()"
+      style="width:100%;background:transparent;border:1px solid var(--cyan);color:var(--cyan);padding:12px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-bottom:10px;"
+      onmouseover="this.style.background='var(--cyan)';this.style.color='#000'"
+      onmouseout="this.style.background='transparent';this.style.color='var(--cyan)'">VERIFY ›</button>
+    <div id="otp-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:18px;margin-bottom:10px;"></div>
+    <div style="font-size:12px;color:#555;letter-spacing:1px;">
+      <span onclick="resendOTP()" style="cursor:pointer;color:#555;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='#555'">Didn't get it? Resend code</span>
+      &nbsp;·&nbsp;
+      <span onclick="signOutUser()" style="cursor:pointer;color:#555;" onmouseover="this.style.color='var(--red-bright)'" onmouseout="this.style.color='#555'">Cancel</span>
+    </div>
   </div>
 </div>
 
@@ -286,8 +318,7 @@ try {
   auth = firebase.auth();
   db = firebase.database();
   chatRef = db.ref('webs-chat');
-  provider = new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({hd:'melissaisd.org'});
+  // Email/password auth — no OAuth provider needed
   firebaseReady = true;
 } catch(e) {
   console.log('Firebase not available:', e);
@@ -370,64 +401,219 @@ window.checkChatOverride = function() {
 if (firebaseReady) {
   auth.onAuthStateChanged(async user => {
     if (!user) {
+      hideAll();
       document.getElementById('signin-screen').classList.add('active');
       return;
     }
+    const email = user.email || '';
+    if (!email.endsWith('@melissaisd.org')) {
+      await auth.signOut();
+      return;
+    }
+    // Check if this user has been OTP-verified
+    try {
+      const snap = await db.ref('verified-users/' + user.uid).get();
+      if (snap.val() === true) {
+        // Already verified — go straight to chat
+        await proceedToChat(user);
+      } else {
+        // Not verified yet — send OTP
+        pendingOTPEmail = email;
+        await sendOTP(user, email);
+      }
+    } catch(e) {
+      // Firebase DB error — try to proceed anyway
+      await proceedToChat(user);
+    }
+  });
+} else {
+  document.getElementById('signin-screen').classList.add('active');
+}
 
-  const email = user.email || '';
+function hideAll() {
+  ['signin-screen','otp-screen','notmember-screen','banned-screen','chat-screen'].forEach(id => {
+    document.getElementById(id).classList.remove('active');
+    document.getElementById(id).style.display = '';
+  });
+}
+
+// ===== AUTH MODE TOGGLE =====
+let authMode = 'signin';
+window.toggleAuthMode = function() {
+  authMode = authMode === 'signin' ? 'create' : 'signin';
+  const isCreate = authMode === 'create';
+  document.getElementById('auth-title').textContent = isCreate ? 'CREATE ACCOUNT' : 'SIGN IN';
+  document.getElementById('auth-sub').innerHTML = isCreate
+    ? 'Enter your Melissa ISD school email.<br>A verification code will be sent to it.'
+    : 'Use your Melissa ISD school email.<br>Only verified WEBS members can enter.';
+  document.getElementById('auth-confirm').style.display = isCreate ? 'block' : 'none';
+  document.getElementById('auth-btn').textContent = isCreate ? 'CREATE ACCOUNT ›' : 'SIGN IN ›';
+  document.getElementById('auth-toggle-link').textContent = isCreate ? 'Already have an account? SIGN IN' : 'No account? CREATE ONE';
+  document.getElementById('signin-error').textContent = '';
+};
+
+// ===== HANDLE AUTH (sign in or create) =====
+window.handleAuth = async function() {
+  const errEl = document.getElementById('signin-error');
+  errEl.textContent = '';
+  const email = (document.getElementById('auth-email').value || '').trim().toLowerCase();
+  const password = document.getElementById('auth-password').value;
+
   if (!email.endsWith('@melissaisd.org')) {
-    document.getElementById('signin-error').textContent = '⚠ Only @melissaisd.org accounts are allowed.';
-    await auth.signOut();
+    errEl.textContent = '⚠ Must use your @melissaisd.org school email.';
+    return;
+  }
+  if (password.length < 6) {
+    errEl.textContent = '⚠ Password must be at least 6 characters.';
+    return;
+  }
+  if (!firebaseReady) {
+    errEl.textContent = '⚠ Firebase not available. Use the override code.';
     return;
   }
 
-  const idNum = email.replace('@melissaisd.org','');
+  if (authMode === 'signin') {
+    try {
+      errEl.textContent = 'Signing in...';
+      await auth.signInWithEmailAndPassword(email, password);
+      // onAuthStateChanged handles the rest
+    } catch(e) {
+      if (e.code === 'auth/user-not-found') errEl.textContent = '⚠ No account found. Create one below.';
+      else if (e.code === 'auth/wrong-password') errEl.textContent = '⚠ Incorrect password.';
+      else if (e.code === 'auth/invalid-email') errEl.textContent = '⚠ Invalid email address.';
+      else errEl.textContent = '⚠ Sign in failed: ' + (e.message || 'unknown error');
+    }
+  } else {
+    const confirm = document.getElementById('auth-confirm').value;
+    if (password !== confirm) {
+      errEl.textContent = '⚠ Passwords do not match.';
+      return;
+    }
+    try {
+      errEl.textContent = 'Creating account...';
+      const cred = await auth.createUserWithEmailAndPassword(email, password);
+      await sendOTP(cred.user, email);
+    } catch(e) {
+      if (e.code === 'auth/email-already-in-use') {
+        errEl.textContent = '⚠ Account already exists. Sign in instead.';
+        authMode = 'create'; toggleAuthMode(); // flip back to sign in
+      } else if (e.code === 'auth/weak-password') {
+        errEl.textContent = '⚠ Password too weak — use 6+ characters.';
+      } else {
+        errEl.textContent = '⚠ Error: ' + (e.message || 'unknown');
+      }
+    }
+  }
+};
 
-  // Fetch member list from Google Sheets
+// ===== OTP SEND =====
+let pendingOTPEmail = '';
+async function sendOTP(user, email) {
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiry = Date.now() + 10 * 60 * 1000; // 10 min
+  pendingOTPEmail = email;
+
+  try {
+    await db.ref('otp-verify/' + user.uid).set({ code, expiry });
+  } catch(e) {
+    console.log('Could not store OTP:', e);
+  }
+
+  try {
+    await emailjs.send('service_g76iwik', 'template_otp', {
+      to_email: email,
+      otp: code
+    });
+  } catch(e) {
+    console.log('EmailJS OTP error:', e);
+  }
+
+  hideAll();
+  document.getElementById('otp-email-display').textContent = email;
+  document.getElementById('otp-screen').classList.add('active');
+}
+
+// ===== OTP VERIFY =====
+window.verifyOTP = async function() {
+  const errEl = document.getElementById('otp-error');
+  errEl.textContent = '';
+  const input = (document.getElementById('otp-input').value || '').trim();
+  const user = auth.currentUser;
+  if (!user) { errEl.textContent = '⚠ Session expired. Please sign in again.'; return; }
+
+  try {
+    const snap = await db.ref('otp-verify/' + user.uid).get();
+    const data = snap.val();
+    if (!data) { errEl.textContent = '⚠ Code expired. Request a new one.'; return; }
+    if (Date.now() > data.expiry) {
+      await db.ref('otp-verify/' + user.uid).remove();
+      errEl.textContent = '⚠ Code expired. Request a new one.';
+      return;
+    }
+    if (input !== data.code) {
+      errEl.textContent = '⚠ Incorrect code. Try again.';
+      document.getElementById('otp-input').value = '';
+      return;
+    }
+    // Verified
+    await db.ref('verified-users/' + user.uid).set(true);
+    await db.ref('otp-verify/' + user.uid).remove();
+    await proceedToChat(user);
+  } catch(e) {
+    errEl.textContent = '⚠ Verification error. Try again.';
+  }
+};
+
+// ===== RESEND OTP =====
+window.resendOTP = async function() {
+  const user = auth.currentUser;
+  if (!user) return;
+  document.getElementById('otp-error').textContent = 'Sending new code...';
+  document.getElementById('otp-input').value = '';
+  await sendOTP(user, pendingOTPEmail || user.email);
+  document.getElementById('otp-error').textContent = '✓ New code sent.';
+};
+
+// ===== PROCEED TO CHAT (after verified) =====
+async function proceedToChat(user) {
+  const email = user.email || '';
+  const idNum = email.replace('@melissaisd.org', '');
+
   let memberName = null;
   let memberRank = 'SCANNED';
   let memberStatus = 'chill';
 
   try {
     sheetMembers = await fetchMembers();
-    // Primary match: try to find member by ID number embedded in email
-    // Sheet columns: name, rank, tags, status
-    // We check if the ID from email matches known IDs, or match by name
-    let match = null;
+    // Match by student ID first (most reliable — ID is the email prefix)
+    let match = sheetMembers.find(m => {
+      const mId = (m.id || m.studentid || m['student id'] || '').toString().trim();
+      return mId && mId === idNum;
+    });
 
-    // Try Google display name match first
-    const googleName = (user.displayName||'').toLowerCase().trim();
-    if (googleName) {
-      match = sheetMembers.find(m => {
-        const sheetName = (m.name||'').toLowerCase().trim();
-        if (sheetName === googleName) return true;
-        const sheetParts = sheetName.split(' ');
-        const googleParts = googleName.split(' ');
-        const sheetFirst = sheetParts[0];
-        const googleFirst = googleParts[0];
-        const sheetLast = sheetParts.slice(-1)[0];
-        const googleLast = googleParts.slice(-1)[0];
-        if (sheetFirst === googleFirst && sheetLast === googleLast) return true;
-        // Handle middle names: first matches + any other word matches
-        if (sheetFirst === googleFirst && sheetParts.some(p => p.length > 1 && googleParts.includes(p))) return true;
-        return false;
-      });
+    // Fallback: name match
+    if (!match) {
+      const displayName = (user.displayName || '').toLowerCase().trim();
+      if (displayName) {
+        match = sheetMembers.find(m => {
+          const sheetName = (m.name || '').toLowerCase().trim();
+          if (sheetName === displayName) return true;
+          const sp = sheetName.split(' '), gp = displayName.split(' ');
+          return sp[0] === gp[0] && sp.slice(-1)[0] === gp.slice(-1)[0];
+        });
+      }
     }
 
-    // Fallback: match by student ID in school email (e.g. 126300@melissaisd.org)
-    if (!match && idNum) {
-      match = sheetMembers.find(m => {
-        const mId = (m.id || m.studentid || m['student id'] || '').toString().trim();
-        return mId && mId === idNum;
-      });
+    // Fallback: any partial email match
+    if (!match) {
+      match = sheetMembers.find(m => (m.email || '').toLowerCase().includes(idNum));
     }
 
     if (match) {
-      memberName = match.name; // use full name from sheet
-      memberRank = (match.rank||'SCANNED').toUpperCase();
-      memberStatus = (match.status||'chill').toLowerCase();
+      memberName = match.name;
+      memberRank = (match.rank || 'SCANNED').toUpperCase();
+      memberStatus = (match.status || 'chill').toLowerCase();
     } else {
-      // Not found in sheet
       hideAll();
       document.getElementById('notmember-email').textContent = email;
       document.getElementById('notmember-screen').classList.add('active');
@@ -439,20 +625,17 @@ if (firebaseReady) {
     return;
   }
 
-  // Check banned
   if (memberStatus.includes('ban') || memberStatus.includes('restrict')) {
     hideAll();
     document.getElementById('banned-screen').classList.add('active');
     return;
   }
 
-  // Determine rank
   let rank = memberRank || 'SCANNED';
-  if (SENTINELS.includes((memberName||'').toLowerCase())) rank = 'SENTINEL';
+  if (SENTINELS.includes((memberName || '').toLowerCase())) rank = 'SENTINEL';
   if (idNum === '302591') rank = 'INDEXED';
 
   currentUser = { id: idNum, name: memberName, rank, email };
-
   hideAll();
   document.getElementById('chat-screen').classList.add('active');
   const badge = document.getElementById('user-badge');
@@ -461,37 +644,9 @@ if (firebaseReady) {
   document.getElementById('signout-btn').style.display = 'block';
   document.getElementById('chat-input').placeholder = `typing as ${memberName}...`;
   document.getElementById('reset-btn').style.display = 'block';
-
   listenMessages();
   playAccessGranted();
-});
-} else {
-  // Firebase not available — show sign-in screen, override still works
-  document.getElementById('signin-screen').classList.add('active');
 }
-
-function hideAll() {
-  ['signin-screen','notmember-screen','banned-screen','chat-screen'].forEach(id => {
-    document.getElementById(id).classList.remove('active');
-    document.getElementById(id).style.display = '';
-  });
-}
-
-// ===== SIGN IN =====
-window.signInWithGoogle = async function() {
-  const errEl = document.getElementById('signin-error');
-  errEl.textContent = '';
-  if (!firebaseReady) {
-    errEl.textContent = '⚠ Firebase not available. Use the override code below.';
-    return;
-  }
-  try {
-    await auth.signInWithPopup(provider);
-  } catch(e) {
-    if (e.code === 'auth/popup-closed-by-user') return;
-    errEl.textContent = '⚠ Sign in failed. Make sure popups are allowed and try again.';
-  }
-};
 
 window.signOutUser = async function() {
   if (firebaseReady) await auth.signOut();
@@ -499,8 +654,10 @@ window.signOutUser = async function() {
   spamLog = [];
   warnedOnce = false;
   punished = false;
+  pendingOTPEmail = '';
   document.getElementById('user-badge').style.display = 'none';
   document.getElementById('signout-btn').style.display = 'none';
+  document.getElementById('reset-btn').style.display = 'none';
   hideAll();
   document.getElementById('signin-screen').classList.add('active');
 };
@@ -675,7 +832,7 @@ document.addEventListener('mousemove', e => {
 const BOOT = [
   {t:'WEBS CHAT NODE — INITIALIZING...',c:'bl-w',d:80},
   {t:'[ OK ] Firebase Auth: connected',c:'bl-g',d:280},
-  {t:'[ OK ] Google Sign-In: ready',c:'bl-g',d:480},
+  {t:'[ OK ] Email verification: active',c:'bl-g',d:480},
   {t:'[ OK ] Member verification: active',c:'bl-g',d:680},
   {t:'[ OK ] Security layer: online',c:'bl-c',d:880},
   {t:'',c:'',d:1060},
