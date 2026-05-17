@@ -225,20 +225,51 @@ header{position:sticky;top:0;z-index:100;background:rgba(3,3,3,0.97);border-bott
 <div id="main-content" style="display:none;">
 <div id="notif-wrap"></div>
 
-<!-- GOOGLE SIGN-IN OVERLAY FOR CHAT -->
+<!-- EMAIL SIGN-IN OVERLAY FOR CHAT -->
 <div id="chat-signin-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:5000;align-items:center;justify-content:center;">
   <div style="background:#050505;border:1px solid var(--green);padding:44px;width:min(460px,92vw);text-align:center;box-shadow:var(--glow-g);animation:modalIn .3s ease;">
-    <div style="font-family:'Rubik Glitch',cursive;font-size:22px;color:var(--green);letter-spacing:3px;margin-bottom:8px;">SENTINEL CHAT</div>
-    <div style="font-size:13px;color:#ddd;letter-spacing:2px;text-transform:uppercase;margin-bottom:32px;line-height:1.8;">Sign in with your school account<br>to verify your SENTINEL rank</div>
-    <button onclick="signInForChat()" style="display:flex;align-items:center;gap:14px;background:#fff;color:#222;border:none;padding:14px 28px;font-family:'Source Code Pro',monospace;font-size:14px;font-weight:700;cursor:pointer;width:100%;justify-content:center;margin-bottom:16px;transition:all .2s;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#fff'">
-      <svg viewBox="0 0 48 48" width="20" height="20"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-      SIGN IN WITH GOOGLE
-    </button>
-    <div style="font-size:12px;color:#555;margin-bottom:14px;">— or use override code —</div>
-    <input type="password" id="override-input" placeholder="override code" style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:11px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;text-align:center;" autocomplete="off" onkeydown="if(event.key==='Enter')checkOverride()">
-    <button onclick="checkOverride()" style="width:100%;background:#000;border:1px solid #555;color:#ddd;padding:11px;font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;margin-bottom:12px;transition:all .2s;" onmouseover="this.style.borderColor='var(--yellow)';this.style.color='var(--yellow)'" onmouseout="this.style.borderColor='#555';this.style.color='#ddd'">USE OVERRIDE</button>
-    <button onclick="document.getElementById('chat-signin-overlay').style.display='none'" style="background:transparent;border:none;color:#555;font-size:11px;letter-spacing:2px;cursor:pointer;font-family:'Source Code Pro',monospace;text-transform:uppercase;">CANCEL</button>
-    <div id="chat-signin-error" style="margin-top:12px;font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:16px;"></div>
+    <div style="font-family:'Rubik Glitch',cursive;font-size:22px;color:var(--green);letter-spacing:3px;margin-bottom:8px;" id="chat-auth-title">SENTINEL CHAT</div>
+    <div style="font-size:13px;color:#ddd;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;line-height:1.8;" id="chat-auth-sub">Sign in with your school email<br>to verify your SENTINEL rank</div>
+    <input type="email" id="chat-auth-email" placeholder="your@melissaisd.org" autocomplete="off"
+      style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:1px;"
+      onkeydown="if(event.key==='Enter')handleChatAuth()">
+    <input type="password" id="chat-auth-password" placeholder="password" autocomplete="off"
+      style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;"
+      onkeydown="if(event.key==='Enter')handleChatAuth()">
+    <input type="password" id="chat-auth-confirm" placeholder="confirm password" autocomplete="off"
+      style="width:100%;background:#000;border:1px solid #333;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;display:none;"
+      onkeydown="if(event.key==='Enter')handleChatAuth()">
+    <button id="chat-auth-btn" onclick="handleChatAuth()"
+      style="width:100%;background:transparent;border:1px solid var(--green);color:var(--green);padding:12px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-bottom:10px;"
+      onmouseover="this.style.background='var(--green)';this.style.color='#000'"
+      onmouseout="this.style.background='transparent';this.style.color='var(--green)'">SIGN IN ›</button>
+    <div id="chat-signin-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:18px;margin-bottom:10px;"></div>
+    <div style="font-size:12px;color:#444;margin-bottom:16px;">
+      <span id="chat-auth-toggle" onclick="toggleChatAuthMode()" style="cursor:pointer;color:#666;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='#666'">No account? CREATE ONE</span>
+    </div>
+    <div style="font-size:12px;color:#333;margin-bottom:10px;letter-spacing:2px;">— or use override code —</div>
+    <input type="password" id="override-input" placeholder="override code" style="width:100%;background:#000;border:1px solid #222;color:#fff;padding:11px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:10px;letter-spacing:2px;text-align:center;" autocomplete="off" onkeydown="if(event.key==='Enter')checkOverride()">
+    <button onclick="checkOverride()" style="width:100%;background:#000;border:1px solid #333;color:#555;padding:11px;font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;margin-bottom:12px;transition:all .2s;" onmouseover="this.style.borderColor='var(--yellow)';this.style.color='var(--yellow)'" onmouseout="this.style.borderColor='#333';this.style.color='#555'">USE OVERRIDE</button>
+    <button onclick="document.getElementById('chat-signin-overlay').style.display='none'" style="background:transparent;border:none;color:#444;font-size:11px;letter-spacing:2px;cursor:pointer;font-family:'Source Code Pro',monospace;text-transform:uppercase;">CANCEL</button>
+  </div>
+</div>
+
+<!-- OTP OVERLAY FOR EDITORS CHAT -->
+<div id="chat-otp-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:5002;align-items:center;justify-content:center;">
+  <div style="background:#050505;border:1px solid var(--cyan);padding:44px;width:min(440px,92vw);text-align:center;box-shadow:var(--glow-c);animation:modalIn .3s ease;">
+    <div style="font-family:'Rubik Glitch',cursive;font-size:22px;color:var(--cyan);letter-spacing:3px;margin-bottom:8px;">VERIFY EMAIL</div>
+    <div style="font-size:13px;color:#ddd;letter-spacing:1px;margin-bottom:24px;line-height:1.8;">A 6-digit code was sent to:<br><span id="chat-otp-email-display" style="color:var(--cyan);"></span><br><br>Check your school email inbox.</div>
+    <input type="text" id="chat-otp-input" placeholder="000000" maxlength="6" autocomplete="off"
+      style="width:100%;background:#000;border:1px solid var(--cyan);color:var(--cyan);padding:14px;font-family:'Source Code Pro',monospace;font-size:22px;outline:none;margin-bottom:10px;letter-spacing:8px;text-align:center;"
+      onkeydown="if(event.key==='Enter')verifyChatOTP()">
+    <button onclick="verifyChatOTP()"
+      style="width:100%;background:transparent;border:1px solid var(--cyan);color:var(--cyan);padding:12px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;margin-bottom:10px;"
+      onmouseover="this.style.background='var(--cyan)';this.style.color='#000'"
+      onmouseout="this.style.background='transparent';this.style.color='var(--cyan)'">VERIFY ›</button>
+    <div id="chat-otp-error" style="font-size:12px;color:var(--red-bright);letter-spacing:1px;min-height:18px;margin-bottom:10px;"></div>
+    <span onclick="resendChatOTP()" style="cursor:pointer;font-size:12px;color:#444;font-family:'Source Code Pro',monospace;letter-spacing:1px;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='#444'">Resend code</span>
+    &nbsp;·&nbsp;
+    <span onclick="document.getElementById('chat-otp-overlay').style.display='none';document.getElementById('chat-signin-overlay').style.display='flex';" style="cursor:pointer;font-size:12px;color:#444;font-family:'Source Code Pro',monospace;letter-spacing:1px;" onmouseover="this.style.color='var(--red-bright)'" onmouseout="this.style.color='#444'">Cancel</span>
   </div>
 </div>
 
@@ -928,36 +959,149 @@ setTimeout(()=>{
     const auth = firebase.auth();
     const db = firebase.database();
     const chatRef = db.ref('admin-chat');
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({hd:'melissaisd.org'});
-
     window._pushChat = (msg) => chatRef.push(msg);
     window._fbSignOut = () => auth.signOut().catch(()=>{});
 
-    window.signInForChat = async function() {
+    // ===== EMAIL/PASSWORD + OTP AUTH FOR EDITORS CHAT =====
+    let chatAuthMode = 'signin';
+    let chatOTPEmail = '';
+
+    window.toggleChatAuthMode = function() {
+      chatAuthMode = chatAuthMode === 'signin' ? 'create' : 'signin';
+      const isCreate = chatAuthMode === 'create';
+      document.getElementById('chat-auth-title').textContent = isCreate ? 'CREATE ACCOUNT' : 'SENTINEL CHAT';
+      document.getElementById('chat-auth-sub').innerHTML = isCreate
+        ? 'Enter your @melissaisd.org email.<br>A verification code will be sent.'
+        : 'Sign in with your school email<br>to verify your SENTINEL rank';
+      document.getElementById('chat-auth-confirm').style.display = isCreate ? 'block' : 'none';
+      document.getElementById('chat-auth-btn').textContent = isCreate ? 'CREATE ACCOUNT ›' : 'SIGN IN ›';
+      document.getElementById('chat-auth-toggle').textContent = isCreate ? 'Already have an account? SIGN IN' : 'No account? CREATE ONE';
+      document.getElementById('chat-signin-error').textContent = '';
+    };
+
+    window.handleChatAuth = async function() {
       const errEl = document.getElementById('chat-signin-error');
       errEl.textContent = '';
-      try {
-        const result = await auth.signInWithPopup(provider);
-        const email = result.user.email || '';
-        if (!email.endsWith('@melissaisd.org')) {
-          errEl.textContent = '⚠ Only @melissaisd.org accounts allowed.';
-          await auth.signOut(); return;
+      const email = (document.getElementById('chat-auth-email').value || '').trim().toLowerCase();
+      const password = document.getElementById('chat-auth-password').value;
+
+      if (!email.endsWith('@melissaisd.org')) {
+        errEl.textContent = '⚠ Must use your @melissaisd.org school email.';
+        return;
+      }
+      const idNum = email.replace('@melissaisd.org', '');
+      if (!SENTINEL_IDS.includes(idNum)) {
+        errEl.textContent = '⚠ Only SENTINEL editors can access this chat.';
+        return;
+      }
+      if (password.length < 6) {
+        errEl.textContent = '⚠ Password must be at least 6 characters.';
+        return;
+      }
+
+      if (chatAuthMode === 'signin') {
+        try {
+          errEl.textContent = 'Signing in...';
+          await auth.signInWithEmailAndPassword(email, password);
+          // onAuthStateChanged handles the rest
+        } catch(e) {
+          if (e.code === 'auth/user-not-found') errEl.textContent = '⚠ No account found. Create one.';
+          else if (e.code === 'auth/wrong-password') errEl.textContent = '⚠ Incorrect password.';
+          else errEl.textContent = '⚠ Sign in failed: ' + (e.message || 'unknown');
         }
-        const idNum = email.replace('@melissaisd.org','');
-        if (!SENTINEL_IDS.includes(idNum)) {
-          errEl.textContent = '⚠ Only SENTINEL editors can access this chat.';
-          await auth.signOut(); return;
+      } else {
+        const confirm = document.getElementById('chat-auth-confirm').value;
+        if (password !== confirm) { errEl.textContent = '⚠ Passwords do not match.'; return; }
+        try {
+          errEl.textContent = 'Creating account...';
+          const cred = await auth.createUserWithEmailAndPassword(email, password);
+          await sendChatOTP(cred.user, email);
+        } catch(e) {
+          if (e.code === 'auth/email-already-in-use') {
+            errEl.textContent = '⚠ Account exists. Sign in instead.';
+            chatAuthMode = 'create'; toggleChatAuthMode();
+          } else {
+            errEl.textContent = '⚠ Error: ' + (e.message || 'unknown');
+          }
         }
-        sessionStorage.setItem('webs-admin-google-id', idNum);
-        sessionStorage.setItem('webs-admin-google-name', result.user.displayName || `User ${idNum}`);
-        document.getElementById('chat-signin-overlay').style.display = 'none';
-        document.getElementById('chat-pass-overlay').style.display = 'flex';
-        document.getElementById('chat-pass-input').focus();
-      } catch(e) {
-        if (e.code !== 'auth/popup-closed-by-user') errEl.textContent = '⚠ Sign in failed. Try again.';
       }
     };
+
+    async function sendChatOTP(user, email) {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiry = Date.now() + 10 * 60 * 1000;
+      chatOTPEmail = email;
+      try { await db.ref('otp-verify/' + user.uid).set({ code, expiry }); } catch(e) {}
+      try {
+        await emailjs.send('service_g76iwik', 'template_otp', { to_email: email, otp: code });
+      } catch(e) { console.log('OTP email error:', e); }
+      document.getElementById('chat-signin-overlay').style.display = 'none';
+      document.getElementById('chat-otp-email-display').textContent = email;
+      document.getElementById('chat-otp-overlay').style.display = 'flex';
+    }
+
+    window.verifyChatOTP = async function() {
+      const errEl = document.getElementById('chat-otp-error');
+      errEl.textContent = '';
+      const input = (document.getElementById('chat-otp-input').value || '').trim();
+      const user = auth.currentUser;
+      if (!user) { errEl.textContent = '⚠ Session expired.'; return; }
+      try {
+        const snap = await db.ref('otp-verify/' + user.uid).get();
+        const data = snap.val();
+        if (!data || Date.now() > data.expiry) {
+          await db.ref('otp-verify/' + user.uid).remove();
+          errEl.textContent = '⚠ Code expired. Request a new one.'; return;
+        }
+        if (input !== data.code) {
+          errEl.textContent = '⚠ Incorrect code.';
+          document.getElementById('chat-otp-input').value = ''; return;
+        }
+        await db.ref('verified-users/' + user.uid).set(true);
+        await db.ref('otp-verify/' + user.uid).remove();
+        // Proceed to chat password
+        document.getElementById('chat-otp-overlay').style.display = 'none';
+        document.getElementById('chat-pass-overlay').style.display = 'flex';
+        document.getElementById('chat-pass-input').focus();
+        const idNum = user.email.replace('@melissaisd.org', '');
+        sessionStorage.setItem('webs-admin-google-id', idNum);
+        sessionStorage.setItem('webs-admin-google-name', user.email.split('@')[0]);
+      } catch(e) { errEl.textContent = '⚠ Verification error. Try again.'; }
+    };
+
+    window.resendChatOTP = async function() {
+      const user = auth.currentUser;
+      if (!user) return;
+      document.getElementById('chat-otp-error').textContent = 'Sending...';
+      document.getElementById('chat-otp-input').value = '';
+      await sendChatOTP(user, chatOTPEmail || user.email);
+      document.getElementById('chat-otp-error').textContent = '✓ New code sent.';
+    };
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) return;
+      const email = user.email || '';
+      if (!email.endsWith('@melissaisd.org')) { await auth.signOut(); return; }
+      const idNum = email.replace('@melissaisd.org', '');
+      if (!SENTINEL_IDS.includes(idNum)) { await auth.signOut(); return; }
+      // Check verified
+      try {
+        const snap = await db.ref('verified-users/' + user.uid).get();
+        if (snap.val() === true) {
+          // Already verified — go to chat password
+          if (document.getElementById('chat-pass-overlay').style.display !== 'flex' &&
+              document.getElementById('chat-signin-row').style.display !== 'none') {
+            document.getElementById('chat-signin-overlay').style.display = 'none';
+            document.getElementById('chat-pass-overlay').style.display = 'flex';
+            document.getElementById('chat-pass-input').focus();
+            sessionStorage.setItem('webs-admin-google-id', idNum);
+            sessionStorage.setItem('webs-admin-google-name', user.displayName || user.email.split('@')[0]);
+          }
+        } else {
+          await sendChatOTP(user, email);
+        }
+      } catch(e) {}
+    });
 
     chatRef.on('value', snap => {
       const resetTs = parseInt(sessionStorage.getItem('webs-chat-reset') || '0');
@@ -1003,9 +1147,12 @@ setTimeout(()=>{
 
   } catch(e) {
     console.log('Firebase init error:', e);
-    window.signInForChat = function() {
+    window.handleChatAuth = function() {
       document.getElementById('chat-signin-error').textContent = '⚠ Firebase unavailable. Use override code.';
     };
+    window.toggleChatAuthMode = function() {};
+    window.verifyChatOTP = function() {};
+    window.resendChatOTP = function() {};
   }
 })();
 } // end startAdmin
