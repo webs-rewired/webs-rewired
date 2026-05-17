@@ -206,6 +206,23 @@ header{position:sticky;top:0;z-index:100;background:rgba(3,3,3,0.97);border-bott
 </head>
 <body>
 
+<!-- PASSWORD GATE — blocks direct URL access -->
+<div id="gate" style="display:flex;position:fixed;inset:0;background:#030303;z-index:99999;align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:#050505;border:1px solid var(--red);padding:44px;width:min(420px,90vw);text-align:center;box-shadow:var(--glow-r);animation:modalIn .3s ease;">
+    <div style="font-family:'Rubik Glitch',cursive;font-size:24px;color:var(--red-bright);letter-spacing:3px;margin-bottom:6px;">ADMIN ACCESS</div>
+    <div style="font-size:9px;color:#ddd;letter-spacing:3px;text-transform:uppercase;margin-bottom:28px;">// enter authorization code</div>
+    <input type="password" id="gate-pass" placeholder="········" maxlength="30" autocomplete="off"
+      style="width:100%;background:#111;border:1px solid #333;color:#fff;padding:12px 16px;font-family:'Source Code Pro',monospace;font-size:14px;letter-spacing:3px;text-align:center;margin-bottom:8px;outline:none;"
+      onkeydown="if(event.key==='Enter')checkGate()">
+    <div id="gate-err" style="font-size:11px;color:var(--red-bright);letter-spacing:2px;min-height:18px;margin-bottom:16px;"></div>
+    <button onclick="checkGate()"
+      style="width:100%;background:transparent;border:1px solid var(--red);color:var(--red-bright);padding:12px;font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;transition:all .2s;"
+      onmouseover="this.style.background='var(--red)';this.style.color='#fff'"
+      onmouseout="this.style.background='transparent';this.style.color='var(--red-bright)'">AUTHENTICATE</button>
+  </div>
+</div>
+
+<div id="main-content" style="display:none;">
 <div id="notif-wrap"></div>
 
 <!-- GOOGLE SIGN-IN OVERLAY FOR CHAT -->
@@ -417,6 +434,36 @@ header{position:sticky;top:0;z-index:100;background:rgba(3,3,3,0.97);border-bott
 </div>
 
 <script>
+// ===== PASSWORD GATE =====
+let gateWrong = 0;
+function checkGate() {
+  const val = document.getElementById('gate-pass').value.trim();
+  if (val === 'websisthe67goat') {
+    sessionStorage.setItem('admin-unlocked', '1');
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+    startAdmin();
+  } else {
+    gateWrong++;
+    document.getElementById('gate-pass').value = '';
+    if (gateWrong >= 3) {
+      // Redirect back to index with sorry modal trigger
+      window.location.href = 'index.html#sorry';
+    } else {
+      document.getElementById('gate-err').textContent = '⚠ ACCESS DENIED — ' + (3 - gateWrong) + ' attempt(s) remaining';
+    }
+  }
+}
+
+// Check if already unlocked this session
+window.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('admin-unlocked') === '1') {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+    startAdmin();
+  }
+});
+
 // ===== FALLBACK MEMBER DATA =====
 const FALLBACK_MEMBERS = [
   {name:'Akshaj Jalla',rank:'SENTINEL',tags:'OG💯, SHERLOCK🔎, SPEED💨, BOLT⚡, KOBE🏀, UNCRACKED🍳, GLITCH, Sleepless☕, DOMINION👑, SPAMMER📨, A-MAX🖖, MOGGER🤫, FAST HANDS🫲🤪🫱, DUO🤝, High Roller⚽',status:'Chill'},
@@ -857,6 +904,7 @@ window.checkPunishment = function() {
 };
 
 // ===== INIT =====
+function startAdmin() {
 loadMembers();
 setTimeout(()=>{
   showNotif({cat:'ACCESS GRANTED',msg:'ADMIN NODE UNLOCKED. WELCOME BACK.',cls:'green'});
@@ -960,6 +1008,8 @@ setTimeout(()=>{
     };
   }
 })();
+} // end startAdmin
 </script>
+</div>
 </body>
 </html>
