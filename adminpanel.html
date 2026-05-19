@@ -233,7 +233,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(3,3,3,0.97);border-bott
     <div style="font-size:12px;color:#888;letter-spacing:1px;margin-bottom:24px;line-height:1.7;" id="chat-auth-sub">Sign in with your school email to verify your SENTINEL rank.</div>
 
     <div style="text-align:left;margin-bottom:5px;font-size:10px;color:#555;letter-spacing:2px;">SCHOOL EMAIL</div>
-    <input type="email" id="chat-auth-email" placeholder="126300@melissaisd.org" autocomplete="off"
+    <input type="email" id="chat-auth-email" placeholder="123456@melissaisd.org" autocomplete="off"
       style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-bottom-color:#444;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:13px;outline:none;margin-bottom:14px;letter-spacing:1px;transition:border .2s;"
       onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='#444'"
       onkeydown="if(event.key==='Enter')document.getElementById('chat-auth-password').focus()">
@@ -245,6 +245,11 @@ header{position:sticky;top:0;z-index:100;background:rgba(3,3,3,0.97);border-bott
       onkeydown="if(event.key==='Enter')handleChatAuth()">
 
     <div id="chat-auth-confirm-wrap" style="display:none;">
+      <div style="text-align:left;margin-bottom:5px;font-size:10px;color:#555;letter-spacing:2px;">YOUR FULL NAME (as listed in WEBS)</div>
+      <input type="text" id="chat-auth-name" placeholder="First Last" autocomplete="off"
+        style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-bottom-color:#444;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:14px;outline:none;margin-bottom:14px;letter-spacing:1px;transition:border .2s;"
+        onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='#444'"
+        onkeydown="if(event.key==='Enter')handleChatAuth()">
       <div style="text-align:left;margin-bottom:5px;font-size:10px;color:#555;letter-spacing:2px;">CONFIRM PASSWORD</div>
       <input type="password" id="chat-auth-confirm" placeholder="••••••••" autocomplete="off"
         style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-bottom-color:#444;color:#fff;padding:12px 14px;font-family:'Source Code Pro',monospace;font-size:14px;outline:none;margin-bottom:14px;letter-spacing:3px;transition:border .2s;"
@@ -683,6 +688,7 @@ window.playSuccess=playSuccess;
 
 // ===== MEMBER LOADING =====
 const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSj2-Rx2rRRWl7YD8SYtXQJA9ZMizTyK1pVrvXwB2q3IgiPnvRNTGt9wmPDhgNHmm_F89aMWQcCCZWJ/pub?gid=0&single=true&output=csv';
+function sheetURL(base) { return base + '&t=' + Date.now(); }
 
 function parseCSV(text) {
   const lines = text.trim().split('\n');
@@ -704,7 +710,7 @@ async function loadMembers() {
   const loadingEl = document.getElementById('member-loading');
   if(loadingEl) loadingEl.textContent = 'LOADING FROM GOOGLE SHEETS...';
   try {
-    const res = await fetch(SHEET_CSV);
+    const res = await fetch(sheetURL(SHEET_CSV));
     if(!res.ok) throw new Error('fetch failed');
     const text = await res.text();
     const parsed = parseCSV(text);
@@ -733,7 +739,7 @@ function renderTable(list) {
   tbody.innerHTML = '';
   list.forEach((m, i) => {
     const rank = (m.rank||'').toUpperCase();
-    const tags = m.tags||'';
+    const tags = m.tags || m.tag || m['tags'] || m['tag'] || '';
     const status = m.status||'Chill';
     const rankHTML = rank==='SENTINEL'
       ? `<span class="rank-sentinel">SENTINEL ★</span>`
@@ -866,6 +872,8 @@ window.checkChatPass = function() {
     document.getElementById('chat-signout-btn').style.display = 'block';
     document.getElementById('chat-input').placeholder = `typing as ${name}...`;
     playSuccess();
+    // Re-render existing messages with correct isOwn highlighting
+    if(window._reRenderChat) window._reRenderChat();
     if(window._pushChat) window._pushChat({type:'system',text:`${name} has joined the chat.`,timestamp:Date.now()});
   } else {
     errEl.textContent = '⚠ wrong password.';
@@ -988,6 +996,53 @@ setTimeout(()=>{
     window._pushChat = (msg) => chatRef.push(msg);
     window._fbSignOut = () => auth.signOut().catch(()=>{});
 
+    // Expose re-render so checkChatPass can call it after sign-in
+    let lastSnap = null;
+    window._reRenderChat = function() {
+      if (lastSnap !== null) renderChatMessages(lastSnap);
+    };
+
+    function renderChatMessages(data) {
+      const resetTs = parseInt(sessionStorage.getItem('webs-chat-reset') || '0');
+      const container = document.getElementById('chat-messages');
+      const statusEl = document.getElementById('chat-status');
+      if (!container) return;
+      container.innerHTML = '';
+      if (!data) {
+        container.innerHTML = '<div class="chat-empty">No messages yet.</div>';
+        if (statusEl) { statusEl.textContent = '● LIVE'; statusEl.style.color = 'var(--green)'; }
+        return;
+      }
+      const entries = Object.entries(data)
+        .sort((a,b) => (a[1].timestamp||0) - (b[1].timestamp||0))
+        .filter(([,m]) => (m.timestamp||0) > resetTs);
+      if (entries.length > 100) {
+        entries.slice(0, entries.length - 100).forEach(([k]) => db.ref('admin-chat/' + k).remove());
+        return;
+      }
+      entries.forEach(([,msg]) => {
+        if (msg.type === 'system') {
+          const d = document.createElement('div');
+          d.className = 'chat-msg system-msg';
+          d.innerHTML = `<div class="chat-msg-text">— ${escapeHTML(msg.text)} —</div>`;
+          container.appendChild(d); return;
+        }
+        const isOwn = currentUser && (msg.id === currentUser.id || msg.name === currentUser.name);
+        const isSentinel = SENTINEL_IDS.includes(msg.id||'') || msg.name === 'ADMIN';
+        const div = document.createElement('div');
+        div.className = `chat-msg${isOwn?' own':''}`;
+        div.innerHTML = `<div class="chat-msg-header">
+          <span class="chat-msg-name ${isSentinel?'sentinel':''}">${escapeHTML(msg.name||'')}</span>
+          <span class="chat-msg-rank ${isSentinel?'cmr-sentinel':'cmr-scanned'}">${isSentinel?'SENTINEL ★':'SCANNED'}</span>
+          <span class="chat-msg-time">${formatDateTime(msg.timestamp)}</span>
+        </div>
+        <div class="chat-msg-text">${escapeHTML(msg.text||'')}</div>`;
+        container.appendChild(div);
+      });
+      container.scrollTop = container.scrollHeight;
+      if (statusEl) { statusEl.textContent = '● LIVE'; statusEl.style.color = 'var(--green)'; }
+    }
+
     // ===== EMAIL/PASSWORD + OTP AUTH FOR EDITORS CHAT =====
     let chatAuthMode = 'signin';
     let chatOTPEmail = '';
@@ -1001,6 +1056,7 @@ setTimeout(()=>{
         ? 'Pick a password for your new account. A verification code will be emailed to you.'
         : 'Sign in with your school email to verify your SENTINEL rank.';
       document.getElementById('chat-auth-confirm-wrap').style.display = isCreate ? 'block' : 'none';
+      if (!isCreate) document.getElementById('chat-auth-name').value = '';
       document.getElementById('chat-auth-btn').textContent = isCreate ? 'CREATE ACCOUNT ›' : 'SIGN IN ›';
       document.getElementById('chat-auth-btn').style.background = isCreate ? 'var(--cyan)' : 'var(--green)';
       document.getElementById('chat-auth-toggle').textContent = isCreate ? 'Already have an account? Sign in here' : 'No account yet? Create one here';
@@ -1040,10 +1096,13 @@ setTimeout(()=>{
       } else {
         const confirm = document.getElementById('chat-auth-confirm').value;
         if (password !== confirm) { errEl.textContent = '⚠ Passwords do not match.'; return; }
+        const fullName = (document.getElementById('chat-auth-name').value || '').trim();
+        if (!fullName) { errEl.textContent = '⚠ Enter your full name as listed in WEBS.'; return; }
         try {
           errEl.textContent = 'Creating account...';
           const cred = await auth.createUserWithEmailAndPassword(email, password);
-          await sendChatOTP(cred.user, email);
+          await cred.user.updateProfile({ displayName: fullName });
+          // onAuthStateChanged fires automatically and calls sendChatOTP
         } catch(e) {
           if (e.code === 'auth/email-already-in-use') {
             errEl.textContent = '⚠ Account exists. Sign in instead.';
@@ -1060,12 +1119,18 @@ setTimeout(()=>{
       const expiry = Date.now() + 10 * 60 * 1000;
       chatOTPEmail = email;
       try { await db.ref('otp-verify/' + user.uid).set({ code, expiry }); } catch(e) {}
-      try {
-        await emailjs.send('service_g76iwik', 'template_1fuxsfr', { to_email: email, otp: code });
-      } catch(e) { console.log('OTP email error:', e); }
       document.getElementById('chat-signin-overlay').style.display = 'none';
       document.getElementById('chat-otp-email-display').textContent = email;
       document.getElementById('chat-otp-overlay').style.display = 'flex';
+      document.getElementById('chat-otp-error').textContent = 'Sending code...';
+      try {
+        const r = await emailjs.send('service_g76iwik', 'template_1fuxsfr', { to_email: email, otp: code });
+        console.log('OTP sent:', r.status);
+        document.getElementById('chat-otp-error').textContent = '';
+      } catch(e) {
+        console.error('EmailJS error:', e.text || e.message || JSON.stringify(e));
+        document.getElementById('chat-otp-error').textContent = '⚠ Email failed (' + (e.text || e.status || 'unknown') + '). Code: ' + code;
+      }
     }
 
     window.verifyChatOTP = async function() {
@@ -1092,8 +1157,15 @@ setTimeout(()=>{
         document.getElementById('chat-pass-overlay').style.display = 'flex';
         document.getElementById('chat-pass-input').focus();
         const idNum = user.email.replace('@melissaisd.org', '');
+        // Map ID to real sentinel name
+        const SENTINEL_NAMES = {
+          '126300':'Akshaj Jalla','121293':'Riley Wayman','345300':'Sriman Katangur',
+          '126299':'Venkata Sistla','345014':'Gohith Vungarala','350045':'Krithik Varaganti',
+          '347081':'Harshith Pydi','347010':'Rugvedh Kasaraneni'
+        };
+        const realName = SENTINEL_NAMES[idNum] || ('SENTINEL-' + idNum);
         sessionStorage.setItem('webs-admin-google-id', idNum);
-        sessionStorage.setItem('webs-admin-google-name', user.email.split('@')[0]);
+        sessionStorage.setItem('webs-admin-google-name', realName);
       } catch(e) { errEl.textContent = '⚠ Verification error. Try again.'; }
     };
 
@@ -1122,8 +1194,13 @@ setTimeout(()=>{
             document.getElementById('chat-signin-overlay').style.display = 'none';
             document.getElementById('chat-pass-overlay').style.display = 'flex';
             document.getElementById('chat-pass-input').focus();
+            const SENTINEL_NAMES2 = {
+              '126300':'Akshaj Jalla','121293':'Riley Wayman','345300':'Sriman Katangur',
+              '126299':'Venkata Sistla','345014':'Gohith Vungarala','350045':'Krithik Varaganti',
+              '347081':'Harshith Pydi','347010':'Rugvedh Kasaraneni'
+            };
             sessionStorage.setItem('webs-admin-google-id', idNum);
-            sessionStorage.setItem('webs-admin-google-name', user.displayName || user.email.split('@')[0]);
+            sessionStorage.setItem('webs-admin-google-name', SENTINEL_NAMES2[idNum] || user.email.split('@')[0]);
           }
         } else {
           await sendChatOTP(user, email);
@@ -1132,45 +1209,8 @@ setTimeout(()=>{
     });
 
     chatRef.on('value', snap => {
-      const resetTs = parseInt(sessionStorage.getItem('webs-chat-reset') || '0');
-      const data = snap.val();
-      const container = document.getElementById('chat-messages');
-      if (!container) return;
-      container.innerHTML = '';
-      const statusEl = document.getElementById('chat-status');
-      if (!data) {
-        container.innerHTML = '<div class="chat-empty">No messages yet.</div>';
-        if (statusEl) { statusEl.textContent = '● LIVE'; statusEl.style.color = 'var(--green)'; }
-        return;
-      }
-      const entries = Object.entries(data)
-        .sort((a,b) => (a[1].timestamp||0) - (b[1].timestamp||0))
-        .filter(([,m]) => (m.timestamp||0) > resetTs);
-      if (entries.length > 100) {
-        entries.slice(0, entries.length - 100).forEach(([k]) => db.ref('admin-chat/' + k).remove());
-        return;
-      }
-      entries.forEach(([,msg]) => {
-        if (msg.type === 'system') {
-          const d = document.createElement('div');
-          d.className = 'chat-msg system-msg';
-          d.innerHTML = `<div class="chat-msg-text">— ${escapeHTML(msg.text)} —</div>`;
-          container.appendChild(d); return;
-        }
-        const isOwn = currentUser && msg.name === currentUser.name;
-        const isSentinel = SENTINEL_IDS.includes(msg.id||'') || msg.name === 'ADMIN';
-        const div = document.createElement('div');
-        div.className = `chat-msg${isOwn?' own':''}`;
-        div.innerHTML = `<div class="chat-msg-header">
-          <span class="chat-msg-name ${isSentinel?'sentinel':''}">${escapeHTML(msg.name||'')}</span>
-          <span class="chat-msg-rank ${isSentinel?'cmr-sentinel':'cmr-scanned'}">${isSentinel?'SENTINEL ★':'SCANNED'}</span>
-          <span class="chat-msg-time">${formatDateTime(msg.timestamp)}</span>
-        </div>
-        <div class="chat-msg-text">${escapeHTML(msg.text||'')}</div>`;
-        container.appendChild(div);
-      });
-      container.scrollTop = container.scrollHeight;
-      if (statusEl) { statusEl.textContent = '● LIVE'; statusEl.style.color = 'var(--green)'; }
+      lastSnap = snap.val();
+      renderChatMessages(lastSnap);
     });
 
   } catch(e) {
