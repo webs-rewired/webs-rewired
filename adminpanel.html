@@ -693,6 +693,7 @@ function sheetURL(base) { return base + '&t=' + Date.now(); }
 function parseCSV(text) {
   const lines = text.trim().split('\n');
   const headers = lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());
+  console.log('Sheet columns detected:', headers);
   return lines.slice(1).map(line => {
     const vals=[]; let cur='',inQ=false;
     for(const c of line){if(c==='"'){inQ=!inQ;}else if(c===','&&!inQ){vals.push(cur.trim());cur='';}else cur+=c;}
@@ -701,6 +702,17 @@ function parseCSV(text) {
     headers.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/^"|"$/g,'').trim());
     return obj;
   }).filter(m=>m.name&&m.name.length>0);
+}
+
+// Find the tags value from a member object regardless of column name
+function getMemberTags(m) {
+  // Try exact names first
+  if (m.tags) return m.tags;
+  if (m.tag) return m.tag;
+  // Try any key that contains 'tag'
+  const tagKey = Object.keys(m).find(k => k.includes('tag'));
+  if (tagKey) return m[tagKey];
+  return '';
 }
 
 let allMembers = [];
@@ -739,7 +751,7 @@ function renderTable(list) {
   tbody.innerHTML = '';
   list.forEach((m, i) => {
     const rank = (m.rank||'').toUpperCase();
-    const tags = m.tags || m.tag || m['tags'] || m['tag'] || '';
+    const tags = getMemberTags(m);
     const status = m.status||'Chill';
     const rankHTML = rank==='SENTINEL'
       ? `<span class="rank-sentinel">SENTINEL ★</span>`
@@ -771,7 +783,7 @@ window.filterMembers = function() {
     const matchSearch = (m.name||'').toLowerCase().includes(q);
     let matchFilter = true;
     const rank=(m.rank||'').toUpperCase();
-    const tags=(m.tags||'').toLowerCase();
+    const tags=getMemberTags(m).toLowerCase();
     const status=(m.status||'').toLowerCase();
     if(currentFilter==='sentinel') matchFilter=rank==='SENTINEL';
     else if(currentFilter==='indexed') matchFilter=rank==='INDEXED';
