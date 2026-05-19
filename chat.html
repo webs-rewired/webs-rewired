@@ -96,7 +96,7 @@ header{background:rgba(3,3,3,.97);border-bottom:1px solid var(--green);padding:1
 #quiz-result{margin-top:20px;text-align:center;font-size:14px;letter-spacing:2px;min-height:24px;line-height:1.8;}
 
 /* SIGN IN SCREEN */
-#signin-screen,#otp-screen{flex:1;display:none;align-items:center;justify-content:center;padding:32px;}
+#signin-screen,#otp-screen{flex:1;display:none;align-items:center;justify-content:center;padding:32px;overflow-y:auto;}
 #signin-screen.active,#otp-screen.active{display:flex;}
 .signin-box{background:#050505;border:1px solid var(--green);padding:50px 44px;width:min(480px,95vw);box-shadow:var(--glow-g);animation:boxIn .4s ease;text-align:center;}
 @keyframes boxIn{from{transform:scale(.95) translateY(10px);opacity:0;}to{transform:none;opacity:1;}}
@@ -222,7 +222,7 @@ header{background:rgba(3,3,3,.97);border-bottom:1px solid var(--green);padding:1
 
     <!-- Inputs -->
     <div style="text-align:left;margin-bottom:6px;font-size:10px;color:#555;letter-spacing:2px;text-transform:uppercase;">School Email</div>
-    <input type="email" id="auth-email" placeholder="126300@melissaisd.org" autocomplete="off"
+    <input type="email" id="auth-email" placeholder="123456@melissaisd.org" autocomplete="off"
       style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-bottom-color:#444;color:#fff;padding:13px 14px;font-family:'Source Code Pro',monospace;font-size:14px;outline:none;margin-bottom:16px;letter-spacing:1px;transition:border .2s;"
       onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='#444'"
       onkeydown="if(event.key==='Enter')document.getElementById('auth-password').focus()">
@@ -234,6 +234,11 @@ header{background:rgba(3,3,3,.97);border-bottom:1px solid var(--green);padding:1
       onkeydown="if(event.key==='Enter')handleAuth()">
 
     <div id="auth-confirm-wrap" style="display:none;">
+      <div style="text-align:left;margin-bottom:6px;font-size:10px;color:#555;letter-spacing:2px;text-transform:uppercase;">Your Full Name (as listed in WEBS)</div>
+      <input type="text" id="auth-name" placeholder="First Last" autocomplete="off"
+        style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-bottom-color:#444;color:#fff;padding:13px 14px;font-family:'Source Code Pro',monospace;font-size:14px;outline:none;margin-bottom:16px;letter-spacing:1px;transition:border .2s;"
+        onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='#444'"
+        onkeydown="if(event.key==='Enter')handleAuth()">
       <div style="text-align:left;margin-bottom:6px;font-size:10px;color:#555;letter-spacing:2px;text-transform:uppercase;">Confirm Password</div>
       <input type="password" id="auth-confirm" placeholder="••••••••" autocomplete="off"
         style="width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-bottom-color:#444;color:#fff;padding:13px 14px;font-family:'Source Code Pro',monospace;font-size:14px;outline:none;margin-bottom:16px;letter-spacing:3px;transition:border .2s;"
@@ -343,11 +348,10 @@ let auth, db, chatRef, provider;
 let firebaseReady = false;
 
 try {
-  firebase.initializeApp(firebaseConfig);
+  const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
   auth = firebase.auth();
   db = firebase.database();
   chatRef = db.ref('webs-chat');
-  // Email/password auth — no OAuth provider needed
   firebaseReady = true;
 } catch(e) {
   console.log('Firebase not available:', e);
@@ -357,6 +361,7 @@ try {
 const SENTINELS = ['akshaj jalla','william riley wayman','riley wayman','sriman katangur','venkata sistla','gohith vungarala','krithik varaganti','harshith pydi','rugvedh kasaraneni'];
 
 const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSj2-Rx2rRRWl7YD8SYtXQJA9ZMizTyK1pVrvXwB2q3IgiPnvRNTGt9wmPDhgNHmm_F89aMWQcCCZWJ/pub?gid=0&single=true&output=csv';
+function sheetURL(base) { return base + '&t=' + Date.now(); }
 
 // Parse CSV into array of objects
 function parseCSV(text) {
@@ -378,7 +383,7 @@ function parseCSV(text) {
 
 // Fetch members from sheet — returns array of {name, rank, status}
 async function fetchMembers() {
-  const res = await fetch(SHEET_CSV);
+  const res = await fetch(sheetURL(SHEET_CSV));
   const text = await res.text();
   return parseCSV(text);
 }
@@ -477,6 +482,7 @@ window.toggleAuthMode = function() {
     ? 'Pick a password for your new account. A verification code will be emailed to you.'
     : 'Enter your Melissa ISD school email and password to access the WEBS Chat Node.';
   document.getElementById('auth-confirm-wrap').style.display = isCreate ? 'block' : 'none';
+  if (!isCreate) document.getElementById('auth-name').value = '';
   document.getElementById('auth-btn').textContent = isCreate ? 'CREATE ACCOUNT ›' : 'SIGN IN ›';
   document.getElementById('auth-btn').style.background = isCreate ? 'var(--cyan)' : 'var(--green)';
   document.getElementById('auth-toggle-link').textContent = isCreate ? 'Already have an account? Sign in here' : 'No account yet? Create one here';
@@ -520,14 +526,21 @@ window.handleAuth = async function() {
       errEl.textContent = '⚠ Passwords do not match.';
       return;
     }
+    const fullName = (document.getElementById('auth-name').value || '').trim();
+    if (!fullName) {
+      errEl.textContent = '⚠ Enter your full name as it appears in WEBS.';
+      return;
+    }
     try {
       errEl.textContent = 'Creating account...';
       const cred = await auth.createUserWithEmailAndPassword(email, password);
-      await sendOTP(cred.user, email);
+      // Save display name so future logins can match against the sheet
+      await cred.user.updateProfile({ displayName: fullName });
+      // onAuthStateChanged fires automatically and calls sendOTP
     } catch(e) {
       if (e.code === 'auth/email-already-in-use') {
         errEl.textContent = '⚠ Account already exists. Sign in instead.';
-        authMode = 'create'; toggleAuthMode(); // flip back to sign in
+        authMode = 'create'; toggleAuthMode();
       } else if (e.code === 'auth/weak-password') {
         errEl.textContent = '⚠ Password too weak — use 6+ characters.';
       } else {
@@ -550,18 +563,24 @@ async function sendOTP(user, email) {
     console.log('Could not store OTP:', e);
   }
 
-  try {
-    await emailjs.send('service_g76iwik', 'template_1fuxsfr', {
-      to_email: email,
-      otp: code
-    });
-  } catch(e) {
-    console.log('EmailJS OTP error:', e);
-  }
-
+  // Always show OTP screen first, then try to email
   hideAll();
   document.getElementById('otp-email-display').textContent = email;
   document.getElementById('otp-screen').classList.add('active');
+  document.getElementById('otp-error').textContent = 'Sending code...';
+
+  try {
+    const result = await emailjs.send('service_g76iwik', 'template_1fuxsfr', {
+      to_email: email,
+      otp: code
+    });
+    console.log('OTP sent successfully:', result.status);
+    document.getElementById('otp-error').textContent = '';
+  } catch(e) {
+    console.error('EmailJS error:', e.text || e.message || JSON.stringify(e));
+    // Show error but keep screen visible so user knows what happened
+    document.getElementById('otp-error').textContent = '⚠ Email failed (' + (e.text || e.status || 'unknown') + '). Check console. Code: ' + code;
+  }
 }
 
 // ===== OTP VERIFY =====
@@ -616,28 +635,28 @@ async function proceedToChat(user) {
 
   try {
     sheetMembers = await fetchMembers();
-    // Match by student ID first (most reliable — ID is the email prefix)
-    let match = sheetMembers.find(m => {
-      const mId = (m.id || m.studentid || m['student id'] || '').toString().trim();
-      return mId && mId === idNum;
-    });
 
-    // Fallback: name match
-    if (!match) {
-      const displayName = (user.displayName || '').toLowerCase().trim();
-      if (displayName) {
-        match = sheetMembers.find(m => {
-          const sheetName = (m.name || '').toLowerCase().trim();
-          if (sheetName === displayName) return true;
-          const sp = sheetName.split(' '), gp = displayName.split(' ');
-          return sp[0] === gp[0] && sp.slice(-1)[0] === gp.slice(-1)[0];
-        });
-      }
+    // Primary match: Firebase display name (set during account creation) vs sheet name
+    const displayName = (user.displayName || '').toLowerCase().trim();
+    let match = null;
+
+    if (displayName) {
+      match = sheetMembers.find(m => {
+        const sheetName = (m.name || '').toLowerCase().trim();
+        if (sheetName === displayName) return true;
+        // First + last match (handles middle names)
+        const sp = sheetName.split(' '), gp = displayName.split(' ');
+        if (sp[0] === gp[0] && sp.slice(-1)[0] === gp.slice(-1)[0]) return true;
+        return false;
+      });
     }
 
-    // Fallback: any partial email match
-    if (!match) {
-      match = sheetMembers.find(m => (m.email || '').toLowerCase().includes(idNum));
+    // Fallback: ID column if sheet has one
+    if (!match && idNum) {
+      match = sheetMembers.find(m => {
+        const mId = (m.id || m.studentid || m['student id'] || '').toString().trim();
+        return mId && mId === idNum;
+      });
     }
 
     if (match) {
