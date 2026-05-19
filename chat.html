@@ -901,11 +901,10 @@ setTimeout(() => {
   const bo = document.getElementById('boot-overlay');
   bo.classList.add('out');
   setTimeout(() => bo.remove(), 900);
-  // Quiz disabled for now — go straight to sign-in
-  // Uncomment below to re-enable quiz:
-  // if (!sessionStorage.getItem('webs-quiz-passed')) {
-  //   document.getElementById('rules-modal').style.display = 'block';
-  // }
+  // Quiz enabled
+  if (!sessionStorage.getItem('webs-quiz-passed')) {
+    document.getElementById('rules-modal').style.display = 'block';
+  }
 }, 1800);
 
 // ===== PROTOCOLS =====
